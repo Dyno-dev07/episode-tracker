@@ -222,3 +222,5 @@ button.metric:hover { border-color: #1b2a4a; }
 .signin { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box; }
 .signin .card { width: 380px; max-width: 100%; padding: 28px; display: flex; flex-direction: column; gap: 14px; box-sizing: border-box; }
 .loading { padding: 28px; font-size: 13px; color: #5f6876; }
+.btn.btn-destructive { background: #a12b2b; }
+.btn.btn-destructive:disabled { background: #d4a5a5; }

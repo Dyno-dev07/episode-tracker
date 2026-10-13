@@ -107,6 +107,10 @@ export function createSupabaseStore(sb: SupabaseClient): Store {
     async handOff(id, note, today) {
       await check(sb.rpc('hand_off', { p_episode: id, p_note: note, p_today: today }));
     },
+    async deleteEpisode(id) {
+      // Handoffs, clips and posts are removed by the foreign key cascades.
+      await check(sb.from('episodes').delete().eq('id', id));
+    },
     async updateEpisode(id, patch) {
       const row: Record<string, unknown> = {};
       if (patch.blocked !== undefined) row.blocked = patch.blocked;

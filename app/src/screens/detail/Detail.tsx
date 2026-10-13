@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useApp, type Tab } from '../../app-context';
+import { ConfirmModal } from '../../components/ConfirmModal';
 import { Avatar, Badge } from '../../components/ui';
 import { EPISODE_STATUS_COLORS, STAGES } from '../../lib/constants';
 import { daysText, fmtDate } from '../../lib/dates';
@@ -14,7 +15,11 @@ import { VerificationTab } from './VerificationTab';
 export function Detail({ e, tab, onTab, onBack }: { e: Episode; tab: Tab; onTab: (t: Tab) => void; onBack: () => void }) {
   const { today, store, run } = useApp();
   const [note, setNote] = useState('');
-  useEffect(() => setNote(''), [e.id]);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  useEffect(() => {
+    setNote('');
+    setConfirmDelete(false);
+  }, [e.id]);
 
   const I = episodeInfo(e, today);
   const flag = e.stage === 6 ? '' : e.blocked ? 'Blocked' : I.overdue ? 'Overdue' : '';
@@ -40,9 +45,14 @@ export function Detail({ e, tab, onTab, onBack }: { e: Episode; tab: Tab; onTab:
 
   return (
     <div className="stack-20">
-      <button className="back" onClick={onBack}>
-        Back to episodes
-      </button>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <button className="back" onClick={onBack}>
+          Back to episodes
+        </button>
+        <button className="btn-danger" onClick={() => setConfirmDelete(true)}>
+          Delete episode
+        </button>
+      </div>
 
       <div className="card detail-head">
         <div className="detail-top">
@@ -113,6 +123,20 @@ export function Detail({ e, tab, onTab, onBack }: { e: Episode; tab: Tab; onTab:
       {tab === 'scheduling' && <SchedulingTab e={e} onGoPackage={() => onTab('package')} />}
       {tab === 'publishing' && <PublishingTab e={e} />}
       {tab === 'verification' && <VerificationTab e={e} />}
+
+      {confirmDelete && (
+        <ConfirmModal
+          title={`Delete EP ${e.num}?`}
+          confirmLabel="Delete episode"
+          onCancel={() => setConfirmDelete(false)}
+          onConfirm={async () => {
+            if (await run(() => store.deleteEpisode(e.id), `EP ${e.num} deleted.`)) onBack();
+            else setConfirmDelete(false);
+          }}
+        >
+          {`"${e.title}" will be removed for everyone, along with its handoff log, ${e.clips.length} clips and ${I.posts.length} posts. This cannot be undone.`}
+        </ConfirmModal>
+      )}
     </div>
   );
 }
