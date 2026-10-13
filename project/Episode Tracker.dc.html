@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><style>body{margin:0;font-family:Arial,Helvetica,sans-serif;color:#2F3640;background:#F4F5F7}a{color:#1B2A4A}a:hover{color:#0E1830}input,select,textarea,button{font-family:Arial,Helvetica,sans-serif}input:focus,select:focus,textarea:focus{outline:2px solid #C8A951;outline-offset:-1px}</style></helmet>
+<div style="display:grid;grid-template-columns:232px minmax(0,1fr);min-height:100vh;background:#F4F5F7;font-family:Arial,Helvetica,sans-serif;color:#2F3640">
+  <aside style="background:#1B2A4A;color:#FFFFFF;position:sticky;top:0;height:100vh;display:flex;flex-direction:column">
+    <div style="padding:22px 20px 20px;border-bottom:1px solid rgba(255,255,255,0.1)">
+      <div style="font-weight:bold;font-size:17px">Episode Tracker</div>
+    </div>
+    <nav style="padding:14px 0;display:flex;flex-direction:column;gap:2px">
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="4">
+        <div onClick="{{ n.onClick }}" style="display:flex;align-items:center;gap:10px;padding:11px 20px 11px 17px;border-left:3px solid {{ n.bar }};background:{{ n.bg }};color:{{ n.fg }};font-weight:{{ n.weight }};font-size:14px;cursor:pointer">
+          <span style="flex:1">{{ n.label }}</span>
+          <sc-if value="{{ n.hasBadge }}" hint-placeholder-val="{{ false }}"><span style="background:#C8A951;color:#1B2A4A;font-size:11px;font-weight:bold;padding:2px 7px;border-radius:10px">{{ n.badge }}</span></sc-if>
+        </div>
+      </sc-for>
+    </nav>
+  </aside>
+
+  <div style="min-width:0;display:flex;flex-direction:column">
+    <header style="height:60px;background:#FFFFFF;border-bottom:1px solid #E2E5EA;display:flex;align-items:center;gap:16px;padding:0 28px;position:sticky;top:0;z-index:5">
+      <input value="{{ search }}" onChange="{{ onSearch }}" placeholder="Search episodes by title" style="width:360px;max-width:50%;height:36px;padding:0 12px;border:1px solid #D3D8E0;border-radius:6px;font-size:13px;color:#2F3640;background:#F7F8FA"></input>
+      <div style="flex:1"></div>
+      <span style="font-size:12px;color:#5F6876;white-space:nowrap">{{ todayLabel }}</span>
+      <button onClick="{{ openModal }}" style="height:36px;padding:0 16px;background:#1B2A4A;color:#FFFFFF;border:0;border-radius:6px;font-size:13px;font-weight:bold;cursor:pointer;white-space:nowrap;flex:none">New episode</button>
+    </header>
+
+    <main style="padding:28px;min-width:0">
+
+      <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:24px">
+          <div>
+            <h1 style="margin:0;font-size:22px;color:#1B2A4A">Dashboard</h1>
+            <div style="font-size:13px;color:#5F6876;margin-top:6px">Every episode from handoff to verified posts</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px">
+            <sc-for list="{{ summary }}" as="m" hint-placeholder-count="4">
+              <div onClick="{{ m.onClick }}" style="background:#FFFFFF;border:1px solid #E2E5EA;border-radius:8px;padding:16px 18px;cursor:pointer" style-hover="border-color:#1B2A4A">
+                <div style="font-size:13px;color:#5F6876">{{ m.label }}</div>
+                <div style="font-size:30px;font-weight:bold;color:#1B2A4A;margin-top:8px">{{ m.value }}</div>
+                <div style="font-size:12px;color:#5F6876;margin-top:4px">{{ m.note }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="background:#FFFFFF;border:1px solid #E2E5EA;border-radius:8px">
+            <div style="display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid #E2E5EA">
+              <h2 style="margin:0;font-size:15px;color:#1B2A4A">Needs my action</h2>
+              <span style="background:#C8A951;color:#1B2A4A;font-size:12px;font-weight:bold;padding:2px 8px;border-radius:10px">{{ actionCount }}</span>
+              <span style="flex:1"></span>
+              <span style="font-size:12px;color:#5F6876;text-align:right">Episodes in social package, scheduled, and published</span>
+            </div>
+            <sc-for list="{{ actions }}" as="a" hint-placeholder-count="3">
+              <div onClick="{{ a.onClick }}" style="display:grid;grid-template-columns:56px minmax(0,1.4fr) minmax(0,0.9fr) minmax(0,2fr) minmax(0,0.8fr) 44px;gap:14px;align-items:center;padding:13px 20px;border-bottom:1px solid #EEF0F3;font-size:13px;cursor:pointer" style-hover="background:#F7F8FA">
+                <span style="font-weight:bold;color:#5F6876">EP {{ a.num }}</span>
+                <span style="font-weight:bold;color:#1F2733">{{ a.title }}</span>
+                <span style="display:inline-flex;align-items:center;gap:6px;color:#1B2A4A"><span style="width:7px;height:7px;border-radius:4px;background:#C8A951"></span>{{ a.stage }}</span>
+                <span style="color:#3A4556">{{ a.detail }}</span>
+                <span style="color:#5F6876">{{ a.days }}</span>
+                <span style="color:#1B2A4A;font-weight:bold;text-align:right">Open</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <div>
+            <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:12px">
+              <h2 style="margin:0;font-size:15px;color:#1B2A4A">Pipeline</h2>
+              <span style="font-size:12px;color:#5F6876">{{ epCount }} episodes</span>
+            </div>
+            <div style="overflow-x:auto;padding-bottom:8px">
+              <div style="display:grid;grid-template-columns:repeat(7,minmax(200px,1fr));gap:12px;min-width:1440px">
+                <sc-for list="{{ columns }}" as="col" hint-placeholder-count="7">
+                  <div style="background:#EBEDF1;border-radius:8px;border-top:3px solid {{ col.top }};padding:12px 10px;display:flex;flex-direction:column;gap:10px;min-height:340px">
+                    <div style="padding:0 4px">
+                      <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;font-weight:bold;color:#1B2A4A">{{ col.label }}</span><span style="font-size:12px;font-weight:bold;color:#5F6876">{{ col.count }}</span></div>
+                      <div style="font-size:12px;color:#5F6876;margin-top:3px">{{ col.owner }}</div>
+                    </div>
+                    <sc-for list="{{ col.cards }}" as="c" hint-placeholder-count="1">
+                      <div onClick="{{ c.onClick }}" style="background:#FFFFFF;border:1px solid #E2E5EA;border-radius:6px;padding:12px;cursor:pointer;display:flex;flex-direction:column;gap:8px" style-hover="border-color:#1B2A4A">
+                        <div style="display:flex;justify-content:space-between;align-items:center;gap:6px">
+                          <span style="font-size:11px;font-weight:bold;color:#5F6876">EP {{ c.num }}</span>
+                          <sc-if value="{{ c.hasFlag }}"><span style="font-size:11px;font-weight:bold;padding:2px 6px;border-radius:4px;background:{{ c.flagBg }};color:{{ c.flagFg }}">{{ c.flag }}</span></sc-if>
+                        </div>
+                        <div style="font-size:13px;font-weight:bold;color:#1F2733;line-height:1.35;text-wrap:pretty">{{ c.title }}</div>
+                        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#3A4556"><span style="width:20px;height:20px;border-radius:10px;background:{{ c.avBg }};color:{{ c.avFg }};font-size:10px;font-weight:bold;display:flex;align-items:center;justify-content:center">{{ c.initial }}</span>{{ c.owner }}</div>
+                        <sc-if value="{{ showCardMeta }}" hint-placeholder-val="{{ true }}">
+                          <div style="display:flex;justify-content:space-between;font-size:12px;color:#5F6876;border-top:1px solid #EEF0F3;padding-top:8px"><span style="color:{{ c.dueColor }}">Due {{ c.due }}</span><span>{{ c.days }}</span></div>
+                        </sc-if>
+                      </div>
+                    </sc-for>
+                    <sc-if value="{{ col.empty }}"><div style="font-size:12px;color:#6B7380;padding:12px 4px">No episodes</div></sc-if>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isEpisodes }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:20px">
+          <div style="display:flex;align-items:flex-end;gap:16px">
+            <div style="flex:1">
+              <h1 style="margin:0;font-size:22px;color:#1B2A4A">Episodes</h1>
+              <div style="font-size:13px;color:#5F6876;margin-top:6px">Showing {{ rowCount }} of {{ epCount }} episodes</div>
+            </div>
+            <button onClick="{{ openModal }}" style="height:36px;padding:0 16px;background:#1B2A4A;color:#FFFFFF;border:0;border-radius:6px;font-size:13px;font-weight:bold;cursor:pointer">Add episode</button>
+          </div>
+          <div style="background:#FFFFFF;border:1px solid #E2E5EA;border-radius:8px;padding:14px 16px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end">
+            <label style="display:flex;flex-direction:column;gap:5px;font-size:12px;color:#5F6876;flex:1;min-width:220px">Search
+              <input value="{{ search }}" onChange="{{ onSearch }}" placeholder="Title or episode number" style="height:36px;padding:0 10px;border:1px solid #D3D8E0;border-radius:6px;font-size:13px;color:#2F3640"></input>
+            </label>
+            <label style="display:flex;flex-direction:column;gap:5px;font-size:12px;color:#5F6876">Stage
+              <select value="{{ fStage }}" onChange="{{ onFStage }}" style="height:36px;padding:0 8px;border:1px solid #D3D8E0;border-radius:6px;font-size:13px;color:#2F3640;background:#FFFFFF;min-width:170px">
+                <option value="">All stages</option>
+                <sc-for list="{{ stageOpts }}" as="o"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
+              </select>
+            </label>
+            <label style="display:flex;flex-direction:column;gap:5px;font-size:12px;color:#5F6876">Owner
+              <select value="{{ fOwner }}" onChange="{{ onFOwner }}" style="height:36px;padding:0 8px;border:1px solid #D3D8E0;border-radius:6px;font-size:13px;color:#2F3640;background:#FFFFFF;min-width:130px">
+                <option value="">All owners</option>
+                <option value="Tyler">Tyler</option><option value="Nik">Nik</option><option value="Wes">Wes</option><option value="Deanne">Deanne</option>
+              </select>
+            </label>
+            <label style="display:flex;flex-direction:column;gap:5px;font-size:12px;color:#5F6876">Due from
+              <input type="date" value="{{ fFrom }}" onChange="{{ onFFrom }}" style="height:36px;padding:0 8px;border:1px solid #D3D8E0;border-radius:6px;font-size:13px;color:#2F3640"></input>
+            </label>
+            <label style="display:flex;flex-direction:column;gap:5px;font-size:12px;color:#5F6876">Due to
+              <input type="date" value="{{ fTo }}" onChange="{{ onFTo }}" style="height:36px;padding:0 8px;border:1px solid #D3D8E0;border-radius:6px;font-size:13px;color:#2F3640"></input>
+            </label>
+            <button onClick="{{ clearFilters }}" style="height:36px;padding:0 14px;background:#FFFFFF;color:#1B2A4A;border:1px solid #D3D8E0;border-radius:6px;font-size:13px;cursor:pointer;white-space:nowrap">Clear filters</button>
+          </div>
+          <div style="background:#FFFFFF;border:1px solid #E2E5EA;border-radius:8px;overflow-x:auto"><div style="min-width:1080px">
+            <div style="display:grid;grid-template-columns:72px minmax(200px,2.4fr) 160px 120px 108px 108px 108px 100px;gap:12px;padding:0 20px;background:#F7F8FA;border-bottom:1px solid #E2E5EA">
+              <sc-for list="{{ headers }}" as="h" hint-placeholder-count="8">
+                <div onClick="{{ h.onClick }}" style="padding:11px 0;font-size:12px;font-weight:bold;color:{{ h.color }};cursor:pointer;display:flex;gap:4px;user-select:none">{{ h.label }}<span>{{ h.arrow }}</span></div>
+              </sc-for>
+            </div>
+            <sc-for list="{{ rows }}" as="r" hint-placeholder-count="8">
+              <div onClick="{{ r.onClick }}" style="display:grid;grid-template-columns:72px minmax(200px,2.4fr) 160px 120px 108px 108px 108px 100px;gap:12px;padding:13px 20px;border-bottom:1px solid #EEF0F3;font-size:13px;align-items:center;cursor:pointer" style-hover="background:#F7F8FA">
+                <span style="font-weight:bold;color:#5F6876">EP {{ r.num }}</span>
+                <span style="font-weight:bold;color:#1F2733">{{ r.title }}</span>
+                <span style="display:inline-flex;align-items:center;gap:6px;color:#1B2A4A"><span style="width:7px;height:7px;border-radius:4px;background:{{ r.dot }}"></span>{{ r.stage }}</span>
+                <span style="display:flex;align-items:center;gap:6px"><span style="width:20px;height:20px;border-radius:10px;background:{{ r.avBg }};color:{{ r.avFg }};font-size:10px;font-weight:bold;display:flex;align-items:center;justify-content:center">{{ r.initial }}</span>{{ r.owner }}</span>
+                <span style="color:#3A4556">{{ r.record }}</span>
+                <span style="color:{{ r.dueColor }}">{{ r.due }}</span>
+                <span style="color:#3A4556">{{ r.publish }}</span>
+                <span><span style="font-size:12px;font-weight:bold;padding:3px 8px;border-radius:4px;background:{{ r.stBg }};color:{{ r.stFg }}">{{ r.status }}</span></span>
+              </div>
+            </sc-for>
+            <sc-if value="{{ noRows }}"><div style="padding:32px 20px;font-size:13px;color:#5F6876">No episodes match these filters.</div></sc-if>
+          </div></div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:20px" data-comment-anchor="ee91e1e9a5-div">
+          <div onClick="{{ backToEpisodes }}" style="font-size:13px;color:#1B2A4A;cursor:pointer;font-weight:bold">Back to episodes</div>
+          <div style="background:#FFFFFF;border:1px solid #E2E5EA;border-radius:8px;padding:24px 28px">
+            <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:16px 24px">
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;gap:10px;align-items:center">
+                  <span style="font-size:13px;font-weight:bold;color:#5F6876">EP {{ d.num }}</span>
+                  <sc-if value="{{ d.hasFlag }}"><span style="font-size:12px;font-weight:bold;padding:3px 8px;border-radius:4px;background:{{ d.flagBg }};color:{{ d.flagFg }}">{{ d.flag }}</span></sc-if>
+                </div>
+                <h1 style="margin:6px 0 16px;font-size:24px;color:#1B2A4A">{{ d.title }}</h1>
+                <div style="display:flex;flex-wrap:wrap;gap:14px 32px;font-size:13px;white-space:nowrap">
+                  <div><div style="font-size:12px;color:#5F6876;margin-bottom:5px">Current stage</div><div style="display:flex;align-items:center;gap:6px;font-weight:bold;color:#1B2A4A"><span style="width:8px;height:8px;border-radius:4px;background:#C8A951"></span>{{ d.stageLabel }}</div></div>
+                  <div><div style="font-size:12px;color:#5F6876;margin-bottom:5px">Owner</div><div style="display:flex;align-items:center;gap:6px;font-weight:bold;color:#1F2733"><span style="width:20px;height:20px;border-radius:10px;background:{{ d.avBg }};color:{{ d.avFg }};font-size:10px;display:flex;align-items:center;justify-content:center">{{ d.initial }}</span>{{ d.owner }}</div></div>
+                  <div><div style="font-size:12px;color:#5F6876;margin-bottom:5px">Days in stage</div><div style="font-weight:bold;color:#1F2733">{{ d.days }}</div></div>
+                  <div><div style="font-size:12px;color:#5F6876;margin-bottom:5px">Record date</div><div style="font-weight:bold;color:#1F2733">{{ d.record }}</div></div>
+                  <div><div style="font-size:12px;color:#5F6876;margin-bottom:5px">Due date</div><div style="font-weight:bold;color:{{ d.dueColor }}">{{ d.due }}</div></div>
+                </div>
+              </div>
+              <button onClick="{{ d.onHandoff }}" disabled="{{ d.hoDisabled }}" style="height:38px;padding:0 18px;background:{{ d.hoBg }};color:#FFFFFF;border:0;border-radius:6px;font-size:13px;font-weight:bold;cursor:{{ d.hoCursor }};flex:none">Mark complete and hand off</button>
+            </div>
+            <div style="overflow-x:auto;margin-top:24px;padding-top:22px;border-top:1px solid #EEF0F3"><div style="display:grid;grid-template-columns:repeat(7,minmax(120px,1fr));min-width:840px">
+              <sc-for list="{{ d.timeline }}" as="t" hint-placeholder-count="7">
+                <div style="display:flex;flex-direction:column;gap:8px;padding-right:10px">
+                  <div style="display:flex;align-items:center">
+                    <span style="width:20px;height:20px;border-radius:10px;border:2px solid {{ t.dotBorder }};background:{{ t.dotBg }};box-sizing:border-box;display:flex;align-items:center;justify-content:center;flex:none">
+                      <sc-if value="{{ t.done }}"><span style="width:4px;height:8px;border-right:2px solid #FFFFFF;border-bottom:2px solid #FFFFFF;transform:rotate(45deg);margin-top:-2px"></span></sc-if>
+                      <sc-if value="{{ t.current }}"><span style="width:8px;height:8px;border-radius:4px;background:#C8A951"></span></sc-if>
+                    </span>
+                    <span style="flex:1;height:2px;background:{{ t.line }};margin-left:6px"></span>
+                  </div>
+                  <div style="font-size:13px;font-weight:bold;color:{{ t.labelColor }}">{{ t.label }}</div>
+                  <div style="font-size:12px;color:#5F6876;line-height:1.4">{{ t.meta }}</div>
+                </div>
+              </sc-for>
+            </div></div>
+          </div>
+
+          <div style="display:flex;gap:28px;border-bottom:1px solid #D9DDE3;overflow-x:auto;white-space:nowrap">
+            <sc-for list="{{ d.tabs }}" as="tb" hint-placeholder-count="5">
+              <div onClick="{{ tb.onClick }}" style="padding:10px 0 11px;border-bottom:3px solid {{ tb.bar }};margin-bottom:-1px;font-size:14px;font-weight:{{ tb.weight }};color:{{ tb.fg }};cursor:pointer;display:flex;gap:6px;align-items:center">{{ tb.label }}<sc-if value="{{ tb.hasCount }}"><span style="font-size:11px;font-weight:bold;padding:1px 6px;border-radius:9px;background:#E9ECF1;color:#3A4556">{{ tb.count }}</span></sc-if></div>
+            </sc-for>
+          </div>
+
+          <sc-if value="{{ d.tabHandoffs }}">
+            <div style="display:grid;grid-template-columns:400px minmax(0,1fr);gap:20px;align-items:start">
+              <div style="display:flex;flex-direction:column;gap:20px">
+                <div style="background:#FFFFFF;border:1px solid #E2E5EA;border-radius:8px;padding:20px">
+                  <h2 style="margin:0 0 16px;font-size:15px;color:#1B2A4A">Hand off</h2>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px">
+                    <div style="background:#F7F8FA;border:1px solid #E2E5EA;border-radius:6px;padding:10px 12px"><div style="font-size:12px;color:#5F6876">From</div><div style="font-weight:bold;color:#1F2733;margin-top:4px">{{ d.stageLabel }}</div><div style="color:#3A4556;margin-top:2px">{{ d.owner }}</div></div>
+                    <div style="background:#F7F8FA;border:1px solid #E2E5EA;border-radius:6px;padding:10px 12px"><div style="font-size:12px;color:#5F6876">To</div><div style="font-weight:bold;color:#1F2733;margin-top:4px">{{ d.nextLabel }}</div><div style="color:#3A4556;margin-top:2px">{{ d.nextOwner }}</div></div>
+                  </div>
+                  <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#5F6876;margin-top:16px">{{ d.notePlaceholder }}
+                    <textarea value="{{ note }}" onChange="{{ onNote }}" rows="3" style="padding:8px 10px;border:1px solid #D3D8E0;border-radius:6px;font-size:13px;color:#2F3640;resize:vertical"></textarea>
+                  </label>
+                  <sc-if value="{{ d.hasGate }}"><div style="margin-top:14px;font-size:13px;line-height:1.45;color:#3A4556;background:#F7F8FA;border:1px solid #E2E5EA;border-radius:6px;padding:10px 12px">{{ d.gate }}</div></sc-if>
+                  <button onClick="{{ d.onHandoff }}" disabled="{{ d.hoDisabled }}" style="margin-top:16px;width:100%;height:38px;background:{{ d.hoBg }};color:#FFFFFF;border:0;border-radius:6px;font-size:13px;font-weight:bold;cursor:{{ d.hoCursor }}">Mark complete and hand off</button>
+                </div>
+                <div style="background:#FFFFFF;border:1px solid #E2E5EA;border-radius:8px;padding:20px">
+                  <h2 style="margin:0 0 14px;font-size:15px;color:#1B2A4A">Flags</h2>
+                  <div style="display:flex;gap:10px;align-items:flex-start;font-size:13px;padding-bottom:14px;border-bottom:1px solid #EEF0F3">
+                    <span style="width:8px;height:8px;border-radius:4px;background:{{ d.odDot }};margin-top:4px;flex:none"></span>
+                    <div><div style="font-weight:bold;color:#1F2733">Overdue</div><div style="color:#3A4556;margin-top:3px">{{ d.odText }}</div></div>
+                  </div>
+                  <div style="display:flex;gap:10px;align-items:flex-start;font-size:13px;padding-top:14px">
+                    <span style="width:8px;height:8px;border-radius:4px;background:{{ d.blDot }};margin-top:4px;flex:none"></span>
+                    <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+                      <div style="font-weight:bold;color:#1F2733">Blocked</div>
+                      <sc-if value="{{ d.isBlocked }}">
+                        <div style="color:#A12B2B;line-height:1.45">{{ d.blocked }}</div>
+                        <button onClick="{{ d.onClearBlock }}" style="align-self:flex-start;height:32px;padding:0 12px;background:#FFFFFF;color:#1B2A4A;border:1px solid #D3D8E0;border-radius:6px;font-size:13px;cursor:pointer">Clear flag</button>
+                      </sc-if>
+                      <sc-if value="{{ d.notBlocked }}">
+                        <input value="{{ blockDraft }}" onChange="{{ onBlockDraft }}" placeholder="What is blocking this handoff" style="height:34px;padding:0 10px;border:1px solid #D3D8E0;border-radius:6px;font-size:13px;color:#2F3640"></input>
+                        <button onClick="{{ d.onBlock }}" style="align-self:flex-start;height:32px;padding:0 12px;background:#FFFFFF;color:#A12B2B;border:1px solid #E6C3C3;border-radius:6px;font-size:13px;cursor:pointer">Flag as blocked</button>
+                      </sc-if>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div style="background:#FFFFFF;border:1px solid #E2E5EA;border-radius:8px">
+                <div style="padding:16px 20px;border-bottom:1px solid #E2E5EA;display:flex;align-items:baseline;gap:10px"><h2 style="margin:0;font-size:15px;color:#1B2A4A">Handoff log</h2><span style="font-size:12px;color:#5F6876">{{ d.logCount }} handoffs</span></div>
+                <sc-for list="{{ d.log }}" as="l" hint-placeholder-count="3">
+                  <div style="display:grid;grid-template-columns:80px minmax(0,1fr);gap:16px;padding:14px 20px;border-bottom:1px solid #EEF0F3;font-size:13px">
+                    <span style="color:#5F6876">{{ l.date }}</span>
+                    <div>
+                      <div style="font-weight:bold;color:#1F2733">{{ l.who }}</div>
+                      <div style="color:#5F6876;margin-top:3px">{{ l.stages }}</div>
+                      <sc-if value="{{ l.hasNote }}"><div style="margin-top:8px;background:#F7F8FA;border:1px solid #EEF0F3;border-radius:6px;padding:8px 10px;color:#3A4556;line-height:1.45">{{ l.note }}</div></sc-if>
+                    </div>
+                  </div>
+                </sc-for>
+                <sc-if value="{{ d.noLog }}"><div style="padding:24px 20px;font-size:13px;color:#5F6876">No handoffs yet. The first handoff happens when Tyler finishes the edit.</div></sc-if>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ d.tabPackage }}">
+            <div style="display:grid;grid-template-columns:360px minmax(0,1fr);gap:20px;align-items:start">
+              <div style="display:flex;flex-direction:column;gap:20px">
+                <div style="background:#FFFFFF;border:1px solid #E2E5EA;border-radius:8px;padding:20px">
+                  <div style="display:flex;justify-content:space-between;align-items:baseline"><h2 style="margin:0;font-size:15px;color:#1B2A4A">OpusClip checklist</h2><span style="font-size:12px;color:#5F6876">{{ d.pkgDone }} of 5 complete</span></div>
+                  <div style="height:6px;background:#E9ECF1;border-radius:3px;margin:12px 0 6px;overflow:hidden"><div style="height:100%;width:{{ d.pkgPct }};background:#1B2A4A"></div></div>
+                  <sc-for list="{{ d.pkg }}" as="c" hint-placeholder-count="5">
+                    <div onClick="{{ c.onClick }}" style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 0;border-bottom:1px solid #EEF0F3">
+                      <span style="width:18px;height:18px;border-radius:4px;border:1.5px solid {{ c.boxBorder }};background:{{ c.boxBg }};box-sizing:border-box;display:flex;align-items:center;justify-content:center;flex:none"><sc-if value="{{ c.on }}"><span style="width:4px;height:8px;border-right:2px solid #FFFFFF;border-bottom:2px solid #FFFFFF;transform:rotate(45deg);margin-top:-2px"></span></sc-if></span>
+                      <span style="font-size:13px;color:#1F2733">{{ c.label }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="background:#FFFFFF;border:1px solid #E2E5EA;border-radius:8px;padding:20px" data-comment-anchor="28d4993563-div">
+                  <h2 style="margin:0;font-size:15px;color:#1B2A4A">Google Drive folder</h2>
+                  <div style="font-size:12px;color:#5F6876;margin:4px 0 12px">Footage and clips from Tyler</div>
+                  <input value="{{ d.opus }}" onChange="{{ d.onOpus }}" placeholder="Paste the Google Drive folder URL" style="width:100%;box-sizing:border-box;height:36px;padding:0 10px;border:1px solid #D3D8E0;border-radius:6px;font-size:13px;color:#2F3640"></input>
+                  <sc-if value="{{ d.hasOpus }}"><a href="{{ d.opus }}" target="_blank" style="display:inline-block;margin-top:10px;font-size:13px;font-weight:bold">Open in Google Drive</a></sc-if>
+                </div>
+              </div>
+              <div style="background:#FFFFFF;border:1px solid #E2E5EA;border-radius:8px">
+                <div style="padding:16px 20px;border-bottom:1px solid #E2E5EA;display:flex;align-items:baseline;gap:10px"><h2 style="margin:0;font-size:15px;color:#1B2A4A">Clips</h2><span style="font-size:12px;color:#5F6876">{{ d.clipCount }} clips</span></div>
+                <sc-for list="{{ d.clips }}" as="c" hint-placeholder-count="3">
+                  <div style="padding:16px 20px;border-bottom:1px solid #EEF0F3;display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:20px">
+                    <div>
+                      <div style="display:flex;gap:10px;align-items:baseline"><span style="font-size:14px;font-weight:bold;color:#1F2733">{{ c.name }}</span><span style="font-size:12px;color:#5F6876">{{ c.len }}</span></div>
+                      <div style="margin-top:8px;font-size:13px;line-height:1.5;color:#3A4556;text-wrap:pretty">{{ c.caption }}</div>
+                    </div>
+                    <div>
+                      <div style="font-size:12px;color:#5F6876;margin-bottom:6px">Target platforms</div>
+                      <div style="display:flex;flex-wrap:wrap;gap:6px">
+                        <sc-for list="{{ c.plats }}" as="p"><span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:3px 8px;border-radius:4px;background:{{ p.tint }};color:#1F2733"><span style="width:7px;height:7px;border-radius:2px;background:{{ p.color }}"></span>{{ p.label }}</span></sc-for>
+                      </div>
+                    </div>
+                  </div>
+                </sc-for>
+                <sc-if value="{{ d.noClips }}"><div style="padding:20px 20px 4px;font-size:13px;color:#5F6876">No clips yet. Add each clip from the Google Drive folder below.</div></sc-if>
+                <div style="padding:16px 20px 20px;background:#F7F8FA;border-top:1px solid #EEF0F3;display:flex;flex-direction:column;gap:12px">
+                  <div style="font-size:13px;font-weight:bold;color:#1B2A4A">Add clip</div>
+                  <div style="display:grid;grid-template-columns:minmax(0,1fr) 100px;gap:12px">
+                    <label style="display:flex;flex-direction:column;gap:5px;font-size:12px;color:#5F6876">Clip name<input value="{{ cf.name }}" onChange="{{ onCfName }}" placeholder="Clip name" style="height:34px;padding:0 10px;border:1px solid #D3D8E0;border-radius:6px;font-size:13px;color:#2F3640;background:#FFFFFF;box-sizing:border-box"></input></label>
+                    <label style="display:flex;flex-direction:column;gap:5px;font-size:12px;color:#5F6876">Length<input value="{{ cf.len }}" onChange="{{ onCfLen }}" placeholder="0:45" style="height:34px;padding:0 10px;border:1px solid #D3D8E0;border-radius:6px;font-size:13px;color:#2F3640;background:#FFFFFF;box-sizing:border-box"></input></label>
+                  </div>
+                  <label style="display:flex;flex-direction:column;gap:5px;font-size:12px;color:#5F6876">Caption<textarea value="{{ cf.caption }}" onChange="{{ onCfCaption }}" rows="2" placeholder="Caption text" style="padding:8px 10px;border:1px solid #D3D8E0;border-radius:6px;font-size:13px;color:#2F3640;resize:vertical"></textarea></label>
+                  <div style="display:flex;flex-direction:column;gap:5px;font-size:12px;color:#5F6876">Target platforms
+                    <div style="display:flex;flex-wrap:wrap;gap:6px">
+                      <sc-for list="{{ cfPlats }}" as="p"><div onClick="{{ p.onClick }}" style="display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:6px;border:1px solid {{ p.border }};background:{{ p.bg }};color:#1F2733;font-size:12px;cursor:pointer"><span style="width:8px;height:8px;border-radius:2px;background:{{ p.color }}"></span>{{ p.label }}</div></sc-for>
+                    </div>
+                  </div>
+                  <sc-if value="{{ hasCfErr }}"><div style="font-size:13px;color:#A12B2B">{{ cfErr }}</div></sc-if>
+                  <div><button onClick="{{ d.onAddClip }}" style="height:34px;padding:0 14px;background:#1B2A4A;color:#FFFFFF;border:0;border-radius:6px;font-size:13px;font-weight:bold;cursor:pointer;white-space:nowrap">Add clip</button></div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ d.tabScheduling }}">
+            <div style="background:#FFFFFF;border:1px solid #E2E5EA;border-radius:8px;overflow-x:auto"><div style="min-width:900px">
+              <div style="padding:16px 20px;border-bottom:1px solid #E2E5EA;display:flex;align-items:baseline;gap:10px"><h2 style="margin:0;font-size:15px;color:#1B2A4A">Post schedule</h2><span style="font-size:12px;color:#5F6876">{{ d.schedSummary }}</span></div>
+              <div style="display:grid;grid-template-columns:minmax(200px,1.6fr) 140px 160px 130px 150px;gap:16px;padding:10px 20px;background:#F7F8FA;border-bottom:1px solid #E2E5EA;font-size:12px;font-weight:bold;color:#5F6876"><span>Clip</span><span>Platform</span><span>Date</span><span>Time</span><span>Status</span></div>
+              <sc-for list="{{ d.posts }}" as="p" hint-placeholder-count="4">
+                <div style="display:grid;grid-template-columns:minmax(200px,1.6fr) 140px 160px 130px 150px;gap:16px;padding:10px 20px;border-bottom:1px solid #EEF0F3;font-size:13px;align-items:center">
+                  <div><div style="font-weight:bold;color:#1F2733">{{ p.clip }}</div><div style="font-size:12px;color:#5F6876;margin-top:2px">{{ p.len }}</div></div>
+                  <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:2px;background:{{ p.color }}"></span>{{ p.plat }}</span>
+                  <input type="date" value="{{ p.date }}" onChange="{{ p.onDate }}" disabled="{{ p.locked }}" style="height:34px;padding:0 8px;border:1px solid #D3D8E0;border-radius:6px;font-size:13px;color:#2F3640;background:{{ p.inputBg }}"></input>
+                  <input type="time" value="{{ p.time }}" onChange="{{ p.onTime }}" disabled="{{ p.locked }}" style="height:34px;padding:0 8px;border:1px solid #D3D8E0;border-radius:6px;font-size:13px;color:#2F3640;background:{{ p.inputBg }}"></input>
+                  <sc-if value="{{ p.editable }}">
+                    <select value="{{ p.status }}" onChange="{{ p.onStatus }}" style="height:34px;padding:0 8px;border:1px solid #D3D8E0;border-radius:6px;font-size:13px;color:#2F3640;background:#FFFFFF"><option value="draft">Draft</option><option value="scheduled">Scheduled</option></select>
+                  </sc-if>
+                  <sc-if value="{{ p.locked }}"><span><span style="font-size:12px;font-weight:bold;padding:3px 8px;border-radius:4px;background:{{ p.stBg }};color:{{ p.stFg }}">{{ p.statusLabel }}</span></span></sc-if>
+                </div>
+              </sc-for>
+              <sc-if value="{{ d.noPosts }}"><div style="padding:20px 20px 4px;font-size:13px;color:#5F6876">No posts yet. Add a post below, or add clips with target platforms in the Social package tab.</div></sc-if>
+              <sc-if value="{{ d.hasClips }}">
+                <div style="padding:16px 20px 20px;background:#F7F8FA;border-top:1px solid #EEF0F3;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end">
+                  <div style="font-size:13px;font-weight:bold;color:#1B2A4A;width:100%">Add post</div>
+                  <label style="display:flex;flex-direction:column;gap:5px;font-size:12px;color:#5F6876;flex:1;min-width:200px">Clip<select value="{{ pf.clipId }}" onChange="{{ onPfClip }}" style="height:34px;padding:0 10px;border:1px solid #D3D8E0;border-radius:6px;font-size:13px;color:#2F3640;background:#FFFFFF;box-sizing:border-box"><sc-for list="{{ d.clipOpts }}" as="o"><option value="{{ o.value }}">{{ o.label }}</option></sc-for></select></label>
+                  <label style="display:flex;flex-direction:column;gap:5px;font-size:12px;color:#5F6876">Platform<select value="{{ pf.plat }}" onChange="{{ onPfPlat }}" style="height:34px;padding:0 10px;border:1px solid #D3D8E0;border-radius:6px;font-size:13px;color:#2F3640;background:#FFFFFF;box-sizing:border-box;min-width:130px"><sc-for list="{{ platOpts }}" as="o"><option value="{{ o.value }}">{{ o.label }}</option></sc-for></select></label>
+                  <label style="display:flex;flex-direction:column;gap:5px;font-size:12px;color:#5F6876">Date<input type="date" value="{{ pf.date }}" onChange="{{ onPfDate }}" style="height:34px;padding:0 10px;border:1px solid #D3D8E0;border-radius:6px;font-size:13px;color:#2F3640;background:#FFFFFF;box-sizing:border-box"></input></label>
+                  <label style="display:flex;flex-direction:column;gap:5px;font-size:12px;color:#5F6876">Time<input type="time" value="{{ pf.time }}" onChange="{{ onPfTime }}" style="height:34px;padding:0 10px;border:1px solid #D3D8E0;border-radius:6px;font-size:13px;color:#2F3640;background:#FFFFFF;box-sizing:border-box"></input></label>
+                  <label style="display:flex;flex-direction:column;gap:5px;font-size:12px;color:#5F6876">Status<select value="{{ pf.status }}" onChange="{{ onPfStatus }}" style="height:34px;padding:0 10px;border:1px solid #D3D8E0;border-radius:6px;font-size:13px;color:#2F3640;background:#FFFFFF;box-sizing:border-box"><option value="draft">Draft</option><option value="scheduled">Scheduled</option></select></label>
+                  <button onClick="{{ d.onAddPost }}" style="height:34px;padding:0 14px;background:#1B2A4A;color:#FFFFFF;border:0;border-radius:6px;font-size:13px;font-weight:bold;cursor:pointer;white-space:nowrap">Add post</button>
+                </div>
+              </sc-if>
+              <sc-if value="{{ d.noClips }}">
+                <div style="padding:16px 20px 20px;border-top:1px solid #EEF0F3;display:flex;align-items:center;gap:12px;font-size:13px;color:#3A4556">Add a clip before scheduling posts.<button onClick="{{ d.goPackage }}" style="height:32px;padding:0 12px;background:#FFFFFF;color:#1B2A4A;border:1px solid #D3D8E0;border-radius:6px;font-size:13px;cursor:pointer">Go to social package</button></div>
+              </sc-if>
+            </div></div>
+          </sc-if>
+
+          <sc-if value="{{ d.tabPublishing }}">
+            <div style="background:#FFFFFF;border:1px solid #E2E5EA;border-radius:8px;overflow-x:auto"><div style="min-width:1060px">
+              <div style="padding:16px 20px;border-bottom:1px solid #E2E5EA;display:flex;align-items:baseline;gap:10px"><h2 style="margin:0;font-size:15px;color:#1B2A4A">Publish status</h2><span style="font-size:12px;color:#5F6876">{{ d.pubSummary }}</span></div>
+              <div style="display:grid;grid-template-columns:minmax(180px,1.3fr) 120px 130px 270px minmax(220px,1.6fr);gap:16px;padding:10px 20px;background:#F7F8FA;border-bottom:1px solid #E2E5EA;font-size:12px;font-weight:bold;color:#5F6876"><span>Clip</span><span>Platform</span><span>Scheduled for</span><span>Status</span><span>Live post URL</span></div>
+              <sc-for list="{{ d.pub }}" as="p" hint-placeholder-count="4">
+                <div style="display:grid;grid-template-columns:minmax(180px,1.3fr) 120px 130px 270px minmax(220px,1.6fr);gap:16px;padding:12px 20px;border-bottom:1px solid #EEF0F3;font-size:13px;align-items:center">
+                  <span style="font-weight:bold;color:#1F2733">{{ p.clip }}</span>
+                  <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:2px;background:{{ p.color }}"></span>{{ p.plat }}</span>
+                  <span style="color:#3A4556">{{ p.when }}</span>
+                  <div style="display:flex;border:1px solid #D3D8E0;border-radius:6px;overflow:hidden;align-self:center">
+                    <sc-for list="{{ p.opts }}" as="o"><div onClick="{{ o.onClick }}" style="flex:1;text-align:center;padding:7px 0;font-size:12px;font-weight:bold;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</div></sc-for>
+                  </div>
+                  <div>
+                    <input value="{{ p.url }}" onChange="{{ p.onUrl }}" disabled="{{ p.urlDisabled }}" placeholder="{{ p.urlPh }}" style="width:100%;box-sizing:border-box;height:34px;padding:0 10px;border:1px solid #D3D8E0;border-radius:6px;font-size:13px;color:#2F3640;background:{{ p.inputBg }}"></input>
+                    <sc-if value="{{ p.failed }}"><div style="font-size:12px;color:#A12B2B;margin-top:5px">Republish on the platform, then set status to published.</div></sc-if>
+                  </div>
+                </div>
+              </sc-for>
+              <sc-if value="{{ d.noPub }}"><div style="padding:24px 20px;font-size:13px;color:#5F6876">Nothing scheduled yet. Posts appear here once they are scheduled.</div></sc-if>
+            </div></div>
+          </sc-if>
+
+          <sc-if value="{{ d.tabVerification }}">
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div style="background:#FFFFFF;border:1px solid #E2E5EA;border-radius:8px;padding:16px 20px;display:flex;align-items:center;gap:20px">
+                <div style="flex:1">
+                  <div style="font-size:15px;font-weight:bold;color:#1B2A4A">{{ d.verHead }}</div>
+                  <div style="font-size:13px;color:#5F6876;margin-top:4px">The episode moves to Verified only when every post is verified.</div>
+                </div>
+                <div style="width:240px;height:8px;background:#E9ECF1;border-radius:4px;overflow:hidden"><div style="height:100%;width:{{ d.verPct }};background:#C8A951"></div></div>
+              </div>
+              <sc-for list="{{ d.ver }}" as="p" hint-placeholder-count="3">
+                <div style="background:#FFFFFF;border:1px solid #E2E5EA;border-radius:8px;padding:16px 20px;display:grid;grid-template-columns:minmax(220px,1fr) minmax(0,2.4fr) 150px;gap:24px;align-items:center">
+                  <div>
+                    <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#3A4556"><span style="width:8px;height:8px;border-radius:2px;background:{{ p.color }}"></span>{{ p.plat }}<span style="color:#5F6876">{{ p.when }}</span></div>
+                    <div style="font-size:14px;font-weight:bold;color:#1F2733;margin-top:5px">{{ p.clip }}</div>
+                    <sc-if value="{{ p.hasUrl }}"><a href="{{ p.url }}" target="_blank" style="font-size:12px;display:inline-block;margin-top:4px;word-break:break-all">{{ p.urlShort }}</a></sc-if>
+                  </div>
+                  <div style="display:flex;flex-wrap:wrap;gap:6px 18px">
+                    <sc-for list="{{ p.checks }}" as="c">
+                      <div onClick="{{ c.onClick }}" style="display:flex;align-items:center;gap:8px;cursor:{{ c.cursor }};padding:4px 0">
+                        <span style="width:18px;height:18px;border-radius:4px;border:1.5px solid {{ c.boxBorder }};background:{{ c.boxBg }};box-sizing:border-box;display:flex;align-items:center;justify-content:center;flex:none"><sc-if value="{{ c.on }}"><span style="width:4px;height:8px;border-right:2px solid #FFFFFF;border-bottom:2px solid #FFFFFF;transform:rotate(45deg);margin-top:-2px"></span></sc-if></span>
+                        <span style="font-size:13px;color:#1F2733">{{ c.label }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div style="text-align:right">
+                    <sc-if value="{{ p.verified }}"><span style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:bold;color:#1B2A4A"><span style="width:8px;height:8px;border-radius:4px;background:#C8A951"></span>Verified {{ p.vDate }}</span></sc-if>
+                    <sc-if value="{{ p.notVerified }}"><button onClick="{{ p.onVerify }}" disabled="{{ p.vDisabled }}" style="height:36px;padding:0 14px;background:{{ p.vBg }};color:#FFFFFF;border:0;border-radius:6px;font-size:13px;font-weight:bold;cursor:{{ p.vCursor }}">Mark verified</button></sc-if>
+                  </div>
+                </div>
+              </sc-for>
+              <sc-if value="{{ d.hasUnpub }}"><div style="font-size:13px;color:#5F6876">{{ d.unpubText }}</div></sc-if>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isCalendar }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;align-items:flex-end;gap:16px">
+            <div style="flex:1">
+              <h1 style="margin:0;font-size:22px;color:#1B2A4A">Content calendar</h1>
+              <div style="font-size:13px;color:#5F6876;margin-top:6px">{{ calRange }}</div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button onClick="{{ calPrev }}" style="height:36px;padding:0 12px;background:#FFFFFF;color:#1B2A4A;border:1px solid #D3D8E0;border-radius:6px;font-size:13px;cursor:pointer">Previous</button>
+              <button onClick="{{ calToday }}" style="height:36px;padding:0 12px;background:#FFFFFF;color:#1B2A4A;border:1px solid #D3D8E0;border-radius:6px;font-size:13px;cursor:pointer">Today</button>
+              <button onClick="{{ calNext }}" style="height:36px;padding:0 12px;background:#FFFFFF;color:#1B2A4A;border:1px solid #D3D8E0;border-radius:6px;font-size:13px;cursor:pointer">Next</button>
+            </div>
+            <div style="display:flex;border:1px solid #D3D8E0;border-radius:6px;overflow:hidden">
+              <sc-for list="{{ calViews }}" as="v"><div onClick="{{ v.onClick }}" style="padding:0 16px;height:34px;display:flex;align-items:center;font-size:13px;font-weight:bold;cursor:pointer;background:{{ v.bg }};color:{{ v.fg }}">{{ v.label }}</div></sc-for>
+            </div>
+          </div>
+          <div style="display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:#3A4556">
+            <sc-for list="{{ legend }}" as="l"><span style="display:inline-flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:2px;background:{{ l.color }}"></span>{{ l.label }}</span></sc-for>
+            <span style="color:#5F6876">Drafts are not shown</span>
+          </div>
+
+          <sc-if value="{{ isWeek }}">
+            <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));background:#FFFFFF;border:1px solid #E2E5EA;border-radius:8px;overflow:hidden">
+              <sc-for list="{{ week }}" as="day" hint-placeholder-count="7">
+                <div style="border-right:1px solid #EEF0F3;min-height:460px;display:flex;flex-direction:column;background:{{ day.bg }}">
+                  <div style="padding:10px 12px;border-bottom:1px solid #EEF0F3;display:flex;align-items:center;gap:8px">
+                    <span style="font-size:12px;color:#5F6876">{{ day.dow }}</span>
+                    <span style="font-size:14px;font-weight:bold;min-width:26px;height:26px;border-radius:13px;display:flex;align-items:center;justify-content:center;background:{{ day.numBg }};color:{{ day.numFg }}">{{ day.num }}</span>
+                  </div>
+                  <div style="padding:8px;display:flex;flex-direction:column;gap:6px">
+                    <sc-for list="{{ day.posts }}" as="c">
+                      <div onClick="{{ c.onClick }}" style="border-left:3px solid {{ c.color }};background:{{ c.tint }};border-radius:4px;padding:7px 8px;cursor:pointer;font-size:12px;line-height:1.35" style-hover="outline:1px solid #1B2A4A">
+                        <div style="display:flex;justify-content:space-between;gap:4px"><span style="font-weight:bold;color:#1F2733">{{ c.time }}</span><span style="color:{{ c.stColor }};font-weight:bold">{{ c.st }}</span></div>
+                        <div style="color:#3A4556">{{ c.plat }}</div>
+                        <div style="color:#1F2733;margin-top:3px"><strong>EP {{ c.num }}</strong> {{ c.clip }}</div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isMonth }}">
+            <div style="background:#FFFFFF;border:1px solid #E2E5EA;border-radius:8px;overflow:hidden">
+              <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));background:#F7F8FA;border-bottom:1px solid #E2E5EA">
+                <sc-for list="{{ dows }}" as="w"><div style="padding:9px 10px;font-size:12px;font-weight:bold;color:#5F6876">{{ w.label }}</div></sc-for>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr))">
+                <sc-for list="{{ month }}" as="day" hint-placeholder-count="35">
+                  <div style="min-height:112px;border-right:1px solid #EEF0F3;border-bottom:1px solid #EEF0F3;padding:6px;display:flex;flex-direction:column;gap:4px;background:{{ day.bg }}">
+                    <span style="align-self:flex-start;font-size:12px;font-weight:bold;min-width:22px;height:22px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:{{ day.numBg }};color:{{ day.numFg }}">{{ day.num }}</span>
+                    <sc-for list="{{ day.posts }}" as="c">
+                      <div onClick="{{ c.onClick }}" style="border-left:3px solid {{ c.color }};background:{{ c.tint }};border-radius:3px;padding:3px 6px;font-size:11px;color:#1F2733;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.time }} EP {{ c.num }} {{ c.plat }}</div>
+                    </sc-for>
+                    <sc-if value="{{ day.hasMore }}"><span style="font-size:11px;color:#5F6876;padding-left:4px">{{ day.more }}</span></sc-if>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isVerification }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:20px">
+          <div>
+            <h1 style="margin:0;font-size:22px;color:#1B2A4A">Verification</h1>
+            <div style="font-size:13px;color:#5F6876;margin-top:6px">Published posts still awaiting verification</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px">
+            <sc-for list="{{ vSummary }}" as="m">
+              <div style="background:#FFFFFF;border:1px solid #E2E5EA;border-radius:8px;padding:16px 18px">
+                <div style="font-size:13px;color:#5F6876">{{ m.label }}</div>
+                <div style="font-size:30px;font-weight:bold;color:#1B2A4A;margin-top:8px">{{ m.value }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="background:#FFFFFF;border:1px solid #E2E5EA;border-radius:8px;overflow:hidden">
+            <div style="padding:16px 20px;border-bottom:1px solid #E2E5EA"><h2 style="margin:0;font-size:15px;color:#1B2A4A">Awaiting verification</h2></div>
+            <div style="display:grid;grid-template-columns:minmax(200px,1.4fr) minmax(180px,1.3fr) 120px 150px 90px 90px 80px;gap:16px;padding:10px 20px;background:#F7F8FA;border-bottom:1px solid #E2E5EA;font-size:12px;font-weight:bold;color:#5F6876"><span>Episode</span><span>Clip</span><span>Platform</span><span>Published</span><span>Waiting</span><span>Checks</span><span></span></div>
+            <sc-for list="{{ awaiting }}" as="r" hint-placeholder-count="4">
+              <div onClick="{{ r.onClick }}" style="display:grid;grid-template-columns:minmax(200px,1.4fr) minmax(180px,1.3fr) 120px 150px 90px 90px 80px;gap:16px;padding:12px 20px;border-bottom:1px solid #EEF0F3;font-size:13px;align-items:center;cursor:pointer" style-hover="background:#F7F8FA">
+                <span><strong style="color:#5F6876">EP {{ r.num }}</strong> <span style="color:#1F2733;font-weight:bold">{{ r.title }}</span></span>
+                <span style="color:#3A4556">{{ r.clip }}</span>
+                <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:2px;background:{{ r.color }}"></span>{{ r.plat }}</span>
+                <span style="color:#3A4556">{{ r.when }}</span>
+                <span style="color:{{ r.waitColor }};font-weight:bold">{{ r.wait }}</span>
+                <span style="color:#3A4556">{{ r.checks }}</span>
+                <span style="color:#1B2A4A;font-weight:bold;text-align:right">Verify</span>
+              </div>
+            </sc-for>
+            <sc-if value="{{ noAwaiting }}"><div style="padding:24px 20px;font-size:13px;color:#5F6876">Every published post is verified.</div></sc-if>
+          </div>
+          <sc-if value="{{ hasFailed }}">
+            <div style="background:#FFFFFF;border:1px solid #E2E5EA;border-radius:8px;overflow:hidden">
+              <div style="padding:16px 20px;border-bottom:1px solid #E2E5EA"><h2 style="margin:0;font-size:15px;color:#A12B2B">Failed posts</h2></div>
+              <sc-for list="{{ failed }}" as="r">
+                <div onClick="{{ r.onClick }}" style="display:grid;grid-template-columns:minmax(200px,1.4fr) minmax(180px,1.3fr) 120px 150px 80px;gap:16px;padding:12px 20px;border-bottom:1px solid #EEF0F3;font-size:13px;align-items:center;cursor:pointer" style-hover="background:#F7F8FA">
+                  <span><strong style="color:#5F6876">EP {{ r.num }}</strong> <span style="color:#1F2733;font-weight:bold">{{ r.title }}</span></span>
+                  <span style="color:#3A4556">{{ r.clip }}</span>
+                  <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:2px;background:{{ r.color }}"></span>{{ r.plat }}</span>
+                  <span style="color:#3A4556">{{ r.when }}</span>
+                  <span style="color:#1B2A4A;font-weight:bold;text-align:right">Fix</span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+    </main>
+  </div>
+
+  <sc-if value="{{ modal }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeModal }}" style="position:fixed;inset:0;background:rgba(20,28,44,0.45);display:flex;align-items:center;justify-content:center;z-index:20">
+      <div onClick="{{ stop }}" style="width:440px;background:#FFFFFF;border-radius:8px;padding:24px;display:flex;flex-direction:column;gap:14px">
+        <h2 style="margin:0;font-size:17px;color:#1B2A4A">New episode</h2>
+        <div style="font-size:13px;color:#5F6876">EP {{ nextNum }} starts in Recording and edit with Tyler as owner.</div>
+        <label style="display:flex;flex-direction:column;gap:5px;font-size:12px;color:#5F6876">Title
+          <input value="{{ nf.title }}" onChange="{{ onNfTitle }}" placeholder="Episode title" style="height:36px;padding:0 10px;border:1px solid #D3D8E0;border-radius:6px;font-size:13px;color:#2F3640"></input>
+        </label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <label style="display:flex;flex-direction:column;gap:5px;font-size:12px;color:#5F6876">Record date<input type="date" value="{{ nf.record }}" onChange="{{ onNfRecord }}" style="height:36px;padding:0 8px;border:1px solid #D3D8E0;border-radius:6px;font-size:13px;color:#2F3640"></input></label>
+          <label style="display:flex;flex-direction:column;gap:5px;font-size:12px;color:#5F6876">Due date<input type="date" value="{{ nf.due }}" onChange="{{ onNfDue }}" style="height:36px;padding:0 8px;border:1px solid #D3D8E0;border-radius:6px;font-size:13px;color:#2F3640"></input></label>
+        </div>
+        <sc-if value="{{ hasNfErr }}"><div style="font-size:13px;color:#A12B2B">{{ nfErr }}</div></sc-if>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:6px">
+          <button onClick="{{ closeModal }}" style="height:36px;padding:0 14px;background:#FFFFFF;color:#1B2A4A;border:1px solid #D3D8E0;border-radius:6px;font-size:13px;cursor:pointer">Cancel</button>
+          <button onClick="{{ createEp }}" style="height:36px;padding:0 16px;background:#1B2A4A;color:#FFFFFF;border:0;border-radius:6px;font-size:13px;font-weight:bold;cursor:pointer">Create episode</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;right:28px;bottom:28px;background:#1B2A4A;color:#FFFFFF;border-left:4px solid #C8A951;border-radius:6px;padding:12px 16px;font-size:13px;z-index:30;max-width:380px">{{ toast }}</div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;dashboard&quot;,&quot;episodes&quot;,&quot;calendar&quot;,&quot;verification&quot;],&quot;default&quot;:&quot;dashboard&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;cardDetail&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;full&quot;,&quot;compact&quot;],&quot;default&quot;:&quot;full&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+const TODAY='2026-10-13';
+const ST=[['Recording and edit','Tyler'],['Review','Nik'],['Approval','Wes'],['Social package','Deanne'],['Scheduled','Deanne'],['Published','Deanne'],['Verified','Deanne']].map(([label,owner])=>({label,owner}));
+const PL={yt:['YouTube','oklch(0.52 0.12 28)','youtube.com/shorts/'],ig:['Instagram','oklch(0.52 0.12 340)','instagram.com/reel/'],tt:['TikTok','oklch(0.52 0.12 190)','tiktok.com/@wsc/video/'],li:['LinkedIn','oklch(0.52 0.12 250)','linkedin.com/feed/update/'],fb:['Facebook','oklch(0.52 0.12 140)','facebook.com/wsc/videos/']};
+const tint=c=>`color-mix(in oklch, ${c} 11%, white)`;
+const CHECKS=['Post is live','Caption correct','Video plays','Link works','Correct account'];
+const PKG=['Clips received in Google Drive','Clips generated','Captions written','Captions approved','Thumbnails ready'];
+const STL={draft:'Draft',scheduled:'Scheduled',published:'Published',failed:'Failed'};
+const STC={draft:['#EEF1F5','#3A4556'],scheduled:['#E6ECF6','#1B2A4A'],published:['#E7F2EB','#2B6B43'],failed:['#FBE9E9','#A12B2B']};
+const SS={Complete:['#E7F2EB','#2B6B43'],Blocked:['#FBE9E9','#A12B2B'],Overdue:['#FDF1DE','#8A5300'],'On track':['#EEF1F5','#3A4556']};
+const D=s=>'2026-'+s;
+const pd=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const add=(s,n)=>{const d=pd(s);d.setDate(d.getDate()+n);return iso(d)};
+const diff=(a,b)=>Math.round((pd(b)-pd(a))/864e5);
+const fmt=s=>s?pd(s).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'Not set';
+const fmtT=t=>{if(!t)return '';let [h,m]=t.split(':').map(Number);const ap=h>=12?'PM':'AM';h=h%12||12;return h+':'+String(m).padStart(2,'0')+' '+ap};
+const daysTxt=n=>n+(n===1?' day':' days');
+const av=o=>o==='Deanne'?['#C8A951','#1B2A4A']:['#1B2A4A','#FFFFFF'];
+const monday=s=>add(s,-((pd(s).getDay()+6)%7));
+let PID=0;
+function mk(num,title,stage,record,done,due,o={}){
+  done=done.map(D);const notes=o.notes||[];
+  const clips=(o.clips||[]).map((c,ci)=>({id:'c'+num+ci,name:c[0],len:c[1],caption:c[2],posts:c[3].map(p=>{PID++;const v=p[4];return {id:'p'+PID,plat:p[0],date:D(p[1]),time:p[2],status:p[3],url:p[3]==='published'?'https://'+PL[p[0]][2]+'wsc'+num+'x'+(1000+PID*37):'',checks:CHECKS.map((_,i)=>v==='V'||i<v),verified:v==='V',vDate:v==='V'?add(D(p[1]),2):''}})}));
+  return {id:'ep'+num,num,title,stage,record:D(record),due:D(due),entered:o.entered?D(o.entered):(done[stage-1]||D(record)),done,
+    handoffs:done.map((d,i)=>({from:ST[i].owner,to:ST[i+1].owner,fs:i,ts:i+1,date:d,note:notes[i]||''})),
+    blocked:o.blocked||'',opus:stage>=1?'https://drive.google.com/drive/folders/wsc-ep'+num:'',pkg:o.pkg||PKG.map(()=>stage>=4),clips};
+}
+function SEED(){PID=0;return [
+  mk(108,'Pricing for repeat clients',6,'09-01',['09-04','09-08','09-10','09-17','09-21','09-29'],'09-29',{notes:['Final cut is in the shared folder. Color pass done.','Two small trims at 12:40 and 31:05. Otherwise good.','Approved.','Package built. 5 posts across 4 platforms.','',''],clips:[
+    ['Raise prices without losing clients','0:48','Most clients expect a price increase. What they do not expect is silence. Here is how we tell repeat clients about new rates.',[['yt','09-23','09:00','published','V'],['li','09-23','12:00','published','V']]],
+    ['The anchor number','0:32','Lead with the outcome, then the number. Our approach to quoting repeat work.',[['ig','09-24','11:00','published','V'],['tt','09-24','18:00','published','V']]],
+    ['Annual rate reviews','0:55','One meeting a year that keeps pricing honest on both sides.',[['li','09-26','08:30','published','V']]]]}),
+  mk(109,'When to say no to a project',5,'09-08',['09-11','09-15','09-17','09-25','10-06'],'10-06',{notes:['Edit is ready. Guest asked us to cut the client name at 18:20, done.','Looks good. Audio dips slightly in the second half.','Approved. Audio fix not needed for socials.','Package ready. 5 posts across 4 platforms.','First posts went live.'],clips:[
+    ['The polite no','0:41','Saying no is a service. A short script for turning down work without burning the bridge.',[['yt','10-06','09:00','published','V'],['ig','10-06','12:00','published','V']]],
+    ['Scope creep warning signs','0:37','Three phrases in a kickoff call that tell us a project will grow without the budget.',[['tt','10-07','18:00','published',3],['li','10-08','08:30','published',0]]],
+    ['Protecting your calendar','0:52','If every project is a yes, nothing gets our best work. How we decide what to take on.',[['ig','10-08','12:00','failed',0]]]]}),
+  mk(110,'Building a referral engine',4,'09-15',['09-18','09-22','09-24','10-09'],'10-13',{notes:['Cut is in the folder. 38 minutes.','Reviewed. Suggest a tighter intro.','Approved with the tighter intro.','Package built. 8 posts, starting Oct 12.'],clips:[
+    ['Ask at the right moment','0:44','The best time to ask for a referral is right after a client says thank you. Here is the exact line we use.',[['yt','10-12','09:00','published',0],['li','10-12','12:00','published',2]]],
+    ['Make it easy to refer','0:29','Give clients a one sentence description of what you do. They will use it.',[['ig','10-14','11:00','scheduled',0],['tt','10-14','18:00','scheduled',0]]],
+    ['Thank you notes that work','0:51','A handwritten note still beats every automated follow up we have tried.',[['fb','10-15','10:00','scheduled',0],['li','10-16','08:30','scheduled',0]]],
+    ['The referral follow up','0:35','What to do in the first 48 hours after someone sends you a lead.',[['ig','10-17','12:00','scheduled',0],['yt','10-19','09:00','scheduled',0]]]]}),
+  mk(111,'Cash flow in the slow season',3,'09-22',['09-26','10-01','10-06'],'10-20',{notes:['Edit done. Includes the whiteboard segment.','Reviewed. No changes.','Approved. Prioritize the runway clip.'],pkg:[true,true,true,false,false],clips:[
+    ['Plan for the dip','0:46','Every service business has a slow season. The ones that last plan for it in the busy months.',[['yt','10-21','09:00','draft',0],['li','10-21','12:00','draft',0]]],
+    ['Three months of runway','0:38','Why we keep three months of expenses in reserve, and how we got there.',[['ig','10-22','11:00','draft',0],['tt','10-22','18:00','draft',0]]],
+    ['Invoicing habits','0:33','Invoice on the day the work ships. Every day you wait is a day added to your payment terms.',[['li','10-23','08:30','draft',0]]]]}),
+  mk(112,'Running a tight weekly meeting',2,'09-29',['10-02','10-07'],'10-10',{notes:['Edit ready for review.','Reviewed. Guest title in the lower third needs a check.'],blocked:'Waiting on the guest to confirm their job title for the lower third.'}),
+  mk(113,'Onboarding new clients well',1,'10-02',['10-09'],'10-27',{notes:['First cut ready. 41 minutes.']}),
+  mk(114,'What we learned from a bad quarter',0,'10-08',[],'11-03'),
+  mk(115,'Delegating without losing quality',0,'10-15',[],'11-10',{entered:'10-12'})
+];}
+
+class Component extends DCLogic {
+  state = {episodes:SEED(),screen:this.props.startScreen ?? 'dashboard',epId:'ep110',tab:'handoffs',search:'',fStage:'',fOwner:'',fFrom:'',fTo:'',sortKey:'num',sortDir:'desc',note:'',blockDraft:'',cf:{name:'',len:'',caption:'',plats:[]},cfErr:'',pf:{clipId:'',plat:'yt',date:'',time:'09:00',status:'scheduled'},calView:'week',calAnchor:TODAY,modal:false,nf:{title:'',record:TODAY,due:''},nfErr:'',toast:''};
+  componentDidUpdate(p){if(p.startScreen!==this.props.startScreen&&this.props.startScreen)this.setState({screen:this.props.startScreen});}
+  componentWillUnmount(){clearTimeout(this.tt);}
+  toast(m){clearTimeout(this.tt);this.setState({toast:m});this.tt=setTimeout(()=>this.setState({toast:''}),2800);}
+  go(screen){this.setState({screen});}
+  open(id,tab){this.setState(st=>({screen:'detail',epId:id,tab:tab||'handoffs',note:'',blockDraft:'',cf:{name:'',len:'',caption:'',plats:[]},cfErr:'',pf:{...st.pf,clipId:'',date:''}}));}
+  upd(id,fn){this.setState(s=>({episodes:s.episodes.map(e=>{if(e.id!==id)return e;const c=JSON.parse(JSON.stringify(e));fn(c);return c;})}));}
+  updPost(id,pid,fn){this.upd(id,e=>e.clips.forEach(c=>c.posts.forEach(p=>{if(p.id===pid)fn(p,e);})));}
+  advance(e,note){e.handoffs.push({from:ST[e.stage].owner,to:ST[e.stage+1].owner,fs:e.stage,ts:e.stage+1,date:TODAY,note});e.done.push(TODAY);e.stage++;e.entered=TODAY;e.blocked='';}
+  posts(e){return e.clips.flatMap(c=>c.posts.map(p=>({...p,clip:c.name,len:c.len})));}
+  info(e){const posts=this.posts(e);const overdue=e.stage<5&&e.due<TODAY;const status=e.stage===6?'Complete':e.blocked?'Blocked':overdue?'Overdue':'On track';const dated=posts.filter(p=>p.status!=='draft').map(p=>p.date).sort();return {posts,overdue,status,owner:ST[e.stage].owner,publish:dated[0]||'',days:diff(e.entered,TODAY)};}
+  handoff(e){const next=ST[e.stage+1];const note=this.state.note.trim();this.upd(e.id,c=>this.advance(c,note));this.setState({note:''});this.toast(`EP ${e.num} moved to ${next.label}. ${next.owner} is now the owner.`);}
+  verify(e,p){const all=this.posts(e);const done=e.stage===5&&all.every(x=>x.verified||x.id===p.id);this.updPost(e.id,p.id,(q,ep)=>{q.verified=true;q.vDate=TODAY;if(ep.stage===5&&ep.clips.flatMap(c=>c.posts).every(x=>x.verified))this.advance(ep,'All posts verified.');});this.toast(done?`All posts verified. EP ${e.num} moved to Verified.`:'Post marked verified.');}
+  chip(e,p){const c=PL[p.plat][1];return {time:fmtT(p.time),plat:PL[p.plat][0],color:c,tint:tint(c),num:e.num,clip:p.clip,st:p.status==='published'?(p.verified?'Verified':'Live'):p.status==='failed'?'Failed':'',stColor:p.status==='failed'?'#A12B2B':'#2B6B43',onClick:()=>this.open(e.id,'scheduling')};}
+
+  renderVals(){
+    const s=this.state,eps=s.episodes;
+    const allPosts=eps.flatMap(e=>this.posts(e).map(p=>({e,p})));
+    const awaitingList=allPosts.filter(x=>x.p.status==='published'&&!x.p.verified);
+    const ws=monday(TODAY),we=add(ws,6);
+    const nav=[['dashboard','Dashboard'],['episodes','Episodes'],['calendar','Calendar'],['verification','Verification']].map(([k,l])=>{const a=s.screen===k||(k==='episodes'&&s.screen==='detail');return {label:l,bg:a?'rgba(255,255,255,0.09)':'transparent',bar:a?'#C8A951':'transparent',fg:a?'#FFFFFF':'rgba(255,255,255,0.75)',weight:a?'bold':'normal',hasBadge:k==='verification'&&awaitingList.length>0,badge:awaitingList.length,onClick:()=>this.go(k)};});
+    const schedWeek=allPosts.filter(x=>x.p.status==='scheduled'&&x.p.date>=ws&&x.p.date<=we).length;
+    const summary=[
+      {label:'Episodes in progress',value:eps.filter(e=>e.stage<6).length,note:'Not yet verified',onClick:()=>this.go('episodes')},
+      {label:'Waiting on someone else',value:eps.filter(e=>e.stage<3).length,note:'With Tyler, Nik, or Wes',onClick:()=>this.setState({screen:'episodes',fOwner:''})},
+      {label:'Scheduled this week',value:schedWeek,note:`${fmt(ws)} to ${fmt(we)}`,onClick:()=>this.setState({screen:'calendar',calView:'week',calAnchor:TODAY})},
+      {label:'Published awaiting verification',value:awaitingList.length,note:`Across ${new Set(awaitingList.map(x=>x.e.id)).size} episodes`,onClick:()=>this.go('verification')}];
+    const actions=eps.filter(e=>e.stage>=3&&e.stage<=5).sort((a,b)=>b.stage-a.stage).map(e=>{const I=this.info(e);let detail,tab;
+      if(e.stage===3){const left=e.pkg.filter(x=>!x).length;detail=left?`${left} of 5 checklist items left`:'Checklist complete. Ready to schedule';tab='package';}
+      else if(e.stage===4){const sc=I.posts.filter(p=>p.status==='scheduled').sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));const aw=I.posts.filter(p=>p.status==='published'&&!p.verified).length;detail=`${sc.length} posts scheduled, next ${fmt(sc[0]&&sc[0].date)}`+(aw?`. ${aw} live awaiting verification`:'');tab='scheduling';}
+      else {const aw=I.posts.filter(p=>p.status==='published'&&!p.verified).length,f=I.posts.filter(p=>p.status==='failed').length;detail=`${aw} awaiting verification`+(f?`, ${f} failed`:'');tab='verification';}
+      return {num:e.num,title:e.title,stage:ST[e.stage].label,detail,days:daysTxt(I.days)+' in stage',onClick:()=>this.open(e.id,tab)};});
+    const card=e=>{const I=this.info(e);const [ab,af]=av(I.owner);const flag=e.blocked?'Blocked':I.overdue?'Overdue':'';return {num:e.num,title:e.title,owner:I.owner,initial:I.owner[0],avBg:ab,avFg:af,due:fmt(e.due),dueColor:I.overdue?'#A12B2B':'#5F6876',days:e.stage===6?'Done':daysTxt(I.days),hasFlag:!!flag,flag,flagBg:flag?SS[flag][0]:'',flagFg:flag?SS[flag][1]:'',onClick:()=>this.open(e.id)};};
+    const columns=ST.map((st,i)=>{const cards=eps.filter(e=>e.stage===i).map(card);return {label:st.label,owner:st.owner==='Deanne'?'Deanne (you)':st.owner,count:cards.length,top:i>=3&&i<6?'#C8A951':'#CDD2DA',cards,empty:!cards.length};});
+
+    // table
+    const q=s.search.trim().toLowerCase();
+    let list=eps.map(e=>({e,I:this.info(e)})).filter(({e,I})=>(!q||e.title.toLowerCase().includes(q)||('ep '+e.num).includes(q)||String(e.num).includes(q))&&(s.fStage===''||e.stage===+s.fStage)&&(!s.fOwner||I.owner===s.fOwner)&&(!s.fFrom||e.due>=s.fFrom)&&(!s.fTo||e.due<=s.fTo));
+    const SO={Blocked:0,Overdue:1,'On track':2,Complete:3};
+    const kv={num:x=>x.e.num,title:x=>x.e.title,stage:x=>x.e.stage,owner:x=>x.I.owner,record:x=>x.e.record,due:x=>x.e.due,publish:x=>x.I.publish||'9999',status:x=>SO[x.I.status]};
+    const f=kv[s.sortKey];list.sort((a,b)=>{const A=f(a),B=f(b);return (A<B?-1:A>B?1:0)*(s.sortDir==='asc'?1:-1);});
+    const headers=[['num','No.'],['title','Title'],['stage','Stage'],['owner','Owner'],['record','Record date'],['due','Due date'],['publish','Publish date'],['status','Status']].map(([k,l])=>({label:l,arrow:s.sortKey===k?(s.sortDir==='asc'?'↑':'↓'):'',color:s.sortKey===k?'#1B2A4A':'#5F6876',onClick:()=>this.setState(st=>({sortKey:k,sortDir:st.sortKey===k&&st.sortDir==='asc'?'desc':'asc'}))}));
+    const rows=list.map(({e,I})=>{const [ab,af]=av(I.owner);return {num:e.num,title:e.title,stage:ST[e.stage].label,dot:e.stage>=3&&e.stage<6?'#C8A951':'#CDD2DA',owner:I.owner,initial:I.owner[0],avBg:ab,avFg:af,record:fmt(e.record),due:fmt(e.due),dueColor:I.overdue?'#A12B2B':'#3A4556',publish:fmt(I.publish),status:I.status,stBg:SS[I.status][0],stFg:SS[I.status][1],onClick:()=>this.open(e.id)};});
+
+    // detail
+    let d={};const e=eps.find(x=>x.id===s.epId);
+    if(e){const I=this.info(e);const [ab,af]=av(I.owner);const flag=e.stage===6?'':e.blocked?'Blocked':I.overdue?'Overdue':'';
+      const allV=I.posts.length>0&&I.posts.every(p=>p.verified);
+      const can=e.stage<5||(e.stage===5&&allV);
+      const unv=I.posts.filter(p=>!p.verified).length;
+      const gate=e.stage===6?'This episode is verified. No further handoffs.':e.stage===5&&!allV?`${unv} of ${I.posts.length} posts still need verification. The episode moves to Verified when every post is verified.`:e.stage===3&&e.pkg.some(x=>!x)?'Some checklist items are still open. You can still hand off if the package is ready.':'';
+      const next=ST[e.stage+1];
+      const timeline=ST.map((st,i)=>{const done=i<e.stage||e.stage===6;const cur=i===e.stage&&e.stage<6;const date=i<e.done.length?e.done[i]:(i===6&&e.stage===6?e.done[5]:'');
+        return {label:st.label,done,current:cur,meta:done?`${fmt(date)} by ${st.owner}`:cur?`${st.owner}, ${daysTxt(I.days)} so far`:`${st.owner}, not started`,dotBg:done?'#1B2A4A':'#FFFFFF',dotBorder:done?'#1B2A4A':cur?'#C8A951':'#CBD1DA',line:i===6?'transparent':(i<e.stage?'#1B2A4A':'#DDE1E7'),labelColor:done||cur?'#1F2733':'#6B7380'};});
+      const verCount=I.posts.filter(p=>p.status==='published').length;
+      const tabs=[['handoffs','Handoffs',''],['package','Social package',e.clips.length?`${e.pkg.filter(Boolean).length}/5`:''],['scheduling','Scheduling',I.posts.length?String(I.posts.length):''],['publishing','Publishing',''],['verification','Verification',verCount?`${I.posts.filter(p=>p.verified).length}/${I.posts.length}`:'']].map(([k,l,c])=>({label:l,count:c,hasCount:!!c,bar:s.tab===k?'#C8A951':'transparent',fg:s.tab===k?'#1B2A4A':'#5F6876',weight:s.tab===k?'bold':'normal',onClick:()=>this.setState({tab:k})}));
+      const log=e.handoffs.slice().reverse().map(h=>({who:`${h.from} to ${h.to}`,stages:`${ST[h.fs].label} to ${ST[h.ts].label}`,date:fmt(h.date),note:h.note,hasNote:!!h.note}));
+      const plats=c=>[...new Set(c.posts.map(p=>p.plat))].map(k=>({label:PL[k][0],color:PL[k][1],tint:tint(PL[k][1])}));
+      const pkgDone=e.pkg.filter(Boolean).length;
+      const sched=I.posts.slice().sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+      const nonDraft=sched.filter(p=>p.status!=='draft');
+      const cnt=st=>I.posts.filter(p=>p.status===st).length;
+      const pubs=sched.filter(p=>p.status==='published');
+      d={num:e.num,title:e.title,stageLabel:ST[e.stage].label,owner:I.owner,initial:I.owner[0],avBg:ab,avFg:af,days:e.stage===6?'Complete':daysTxt(I.days),record:fmt(e.record),due:fmt(e.due),dueColor:I.overdue?'#A12B2B':'#1F2733',
+        hasFlag:!!flag,flag,flagBg:flag?SS[flag][0]:'',flagFg:flag?SS[flag][1]:'',
+        hoDisabled:!can,hoBg:can?'#1B2A4A':'#A3ABB8',hoCursor:can?'pointer':'not-allowed',onHandoff:()=>can&&this.handoff(e),
+        nextLabel:next?next.label:'None',nextOwner:next?next.owner:'Complete',notePlaceholder:next?`Note for ${next.owner} (optional)`:'Note (optional)',hasGate:!!gate,gate,
+        timeline,tabs,log,logCount:log.length,noLog:!log.length,
+        odDot:I.overdue?'#A12B2B':'#CDD2DA',odText:e.stage>=5?'Published. The due date no longer applies.':I.overdue?`Overdue by ${daysTxt(diff(e.due,TODAY))}. Due ${fmt(e.due)}.`:e.due===TODAY?'Due today.':`On schedule. Due ${fmt(e.due)}.`,
+        blDot:e.blocked?'#A12B2B':'#CDD2DA',isBlocked:!!e.blocked,notBlocked:!e.blocked,blocked:e.blocked,
+        onClearBlock:()=>{this.upd(e.id,c=>{c.blocked='';});this.toast('Blocked flag cleared.');},
+        onBlock:()=>{const r=this.state.blockDraft.trim()||'Blocked, no reason given.';this.upd(e.id,c=>{c.blocked=r;});this.setState({blockDraft:''});this.toast(`EP ${e.num} flagged as blocked.`);},
+        tabHandoffs:s.tab==='handoffs',tabPackage:s.tab==='package',tabScheduling:s.tab==='scheduling',tabPublishing:s.tab==='publishing',tabVerification:s.tab==='verification',
+        pkg:PKG.map((l,i)=>({label:l,on:e.pkg[i],boxBg:e.pkg[i]?'#1B2A4A':'#FFFFFF',boxBorder:e.pkg[i]?'#1B2A4A':'#B9C0CB',onClick:()=>this.upd(e.id,c=>{c.pkg[i]=!c.pkg[i];})})),
+        pkgDone,pkgPct:(pkgDone*20)+'%',opus:e.opus,hasOpus:!!e.opus,onOpus:ev=>{const v=ev.target.value;this.upd(e.id,c=>{c.opus=v;});},
+        clips:e.clips.map(c=>({name:c.name,len:c.len,caption:c.caption,plats:plats(c)})),clipCount:e.clips.length,noClips:!e.clips.length,hasClips:e.clips.length>0,goPackage:()=>this.setState({tab:'package'}),
+        clipOpts:e.clips.map(c=>({value:c.id,label:c.name})),
+        onAddClip:()=>{const f=this.state.cf;if(!f.name.trim())return this.setState({cfErr:'Add a clip name.'});const base=e.due>TODAY?e.due:add(TODAY,7);
+          this.upd(e.id,c=>{c.clips.push({id:'c'+c.num+'n'+Date.now(),name:f.name.trim(),len:f.len.trim()||'0:00',caption:f.caption.trim(),posts:f.plats.map(k=>({id:'p'+Date.now()+k,plat:k,date:base,time:'09:00',status:'draft',url:'',checks:CHECKS.map(()=>false),verified:false,vDate:''}))});});
+          this.setState({cf:{name:'',len:'',caption:'',plats:[]},cfErr:''});this.toast(f.plats.length?`Clip added with ${f.plats.length} draft posts. Set dates in Scheduling.`:'Clip added.');},
+        onAddPost:()=>{const f=this.state.pf;const cid=f.clipId&&e.clips.some(c=>c.id===f.clipId)?f.clipId:e.clips[0].id;const date=f.date||(e.due>TODAY?e.due:add(TODAY,7));
+          this.upd(e.id,c=>{c.clips.find(x=>x.id===cid).posts.push({id:'p'+Date.now(),plat:f.plat,date,time:f.time||'09:00',status:f.status,url:'',checks:CHECKS.map(()=>false),verified:false,vDate:''});});
+          this.setState(st=>({pf:{...st.pf,date:''}}));this.toast(`${PL[f.plat][0]} post added for ${fmt(date)}.`);},
+        schedSummary:`${cnt('scheduled')} scheduled, ${cnt('draft')} draft, ${cnt('published')+cnt('failed')} already posted`,
+        posts:sched.map(p=>{const editable=p.status==='draft'||p.status==='scheduled';return {clip:p.clip,len:p.len,plat:PL[p.plat][0],color:PL[p.plat][1],date:p.date,time:p.time,editable,locked:!editable,inputBg:editable?'#FFFFFF':'#F4F5F7',status:p.status,statusLabel:STL[p.status],stBg:STC[p.status][0],stFg:STC[p.status][1],
+          onDate:ev=>{const v=ev.target.value;this.updPost(e.id,p.id,q=>{q.date=v;});},onTime:ev=>{const v=ev.target.value;this.updPost(e.id,p.id,q=>{q.time=v;});},onStatus:ev=>{const v=ev.target.value;this.updPost(e.id,p.id,q=>{q.status=v;});}};}),
+        noPosts:!sched.length,
+        pubSummary:`${cnt('published')} published, ${cnt('scheduled')} scheduled, ${cnt('failed')} failed`+(cnt('draft')?`. ${cnt('draft')} drafts not shown`:''),
+        pub:nonDraft.map(p=>({clip:p.clip,plat:PL[p.plat][0],color:PL[p.plat][1],when:`${fmt(p.date)}, ${fmtT(p.time)}`,url:p.url,urlDisabled:p.status!=='published',urlPh:p.status==='published'?'Paste the live post URL':'Available once published',inputBg:p.status==='published'?'#FFFFFF':'#F4F5F7',failed:p.status==='failed',
+          onUrl:ev=>{const v=ev.target.value;this.updPost(e.id,p.id,q=>{q.url=v;});},
+          opts:['scheduled','published','failed'].map(k=>{const a=p.status===k;return {label:STL[k],bg:a?(k==='failed'?'#A12B2B':'#1B2A4A'):'#FFFFFF',fg:a?'#FFFFFF':'#3A4556',onClick:()=>this.updPost(e.id,p.id,q=>{q.status=k;if(k!=='published'){q.verified=false;q.vDate='';}})};})})),
+        noPub:!nonDraft.length,
+        verHead:I.posts.length?`${I.posts.filter(p=>p.verified).length} of ${I.posts.length} posts verified`:'No posts yet',verPct:I.posts.length?Math.round(I.posts.filter(p=>p.verified).length/I.posts.length*100)+'%':'0%',
+        ver:pubs.map(p=>{const all=p.checks.every(Boolean);const okV=all&&!p.verified;return {clip:p.clip,plat:PL[p.plat][0],color:PL[p.plat][1],when:`${fmt(p.date)}, ${fmtT(p.time)}`,url:p.url,hasUrl:!!p.url,urlShort:p.url.replace('https://',''),verified:p.verified,notVerified:!p.verified,vDate:fmt(p.vDate),
+          vDisabled:!okV,vBg:okV?'#1B2A4A':'#A3ABB8',vCursor:okV?'pointer':'not-allowed',onVerify:()=>okV&&this.verify(e,p),
+          checks:CHECKS.map((l,i)=>({label:l,on:p.checks[i],boxBg:p.checks[i]?'#1B2A4A':'#FFFFFF',boxBorder:p.checks[i]?'#1B2A4A':'#B9C0CB',cursor:p.verified?'default':'pointer',onClick:()=>!p.verified&&this.updPost(e.id,p.id,q=>{q.checks[i]=!q.checks[i];})}))};}),
+        hasUnpub:I.posts.length>pubs.length,unpubText:`${I.posts.length-pubs.length} posts are not published yet. They appear here once published.`};
+    }
+
+    // calendar
+    const calPosts=allPosts.filter(x=>x.p.status!=='draft');
+    const onDay=day=>calPosts.filter(x=>x.p.date===day).sort((a,b)=>a.p.time.localeCompare(b.p.time)).map(x=>this.chip(x.e,x.p));
+    const DOW=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    const cws=monday(s.calAnchor);
+    const week=DOW.map((w,i)=>{const day=add(cws,i);const t=day===TODAY;return {dow:w,num:pd(day).getDate(),numBg:t?'#C8A951':'transparent',numFg:t?'#1B2A4A':'#1F2733',bg:t?'#FCFBF7':'#FFFFFF',posts:onDay(day)};});
+    const a=pd(s.calAnchor);const first=iso(new Date(a.getFullYear(),a.getMonth(),1));const ms=monday(first);
+    const lastDay=iso(new Date(a.getFullYear(),a.getMonth()+1,0));const mweeks=Math.ceil((diff(ms,lastDay)+1)/7);
+    const month=Array.from({length:mweeks*7},(_,i)=>{const day=add(ms,i);const inM=pd(day).getMonth()===a.getMonth();const t=day===TODAY;const ps=onDay(day);return {num:pd(day).getDate(),numBg:t?'#C8A951':'transparent',numFg:t?'#1B2A4A':(inM?'#1F2733':'#A3ABB8'),bg:inM?'#FFFFFF':'#F7F8FA',posts:ps.slice(0,3),hasMore:ps.length>3,more:`${ps.length-3} more`};});
+    const isWeek=s.calView==='week';
+    const calRange=isWeek?`${fmt(cws)} to ${fmt(add(cws,6))}, ${pd(add(cws,6)).getFullYear()}`:a.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+    const shift=dir=>this.setState(st=>{if(st.calView==='week')return {calAnchor:add(st.calAnchor,7*dir)};const b=pd(st.calAnchor);return {calAnchor:iso(new Date(b.getFullYear(),b.getMonth()+dir,1))};});
+
+    // verification report
+    const awaiting=awaitingList.slice().sort((x,y)=>x.p.date.localeCompare(y.p.date)).map(({e,p})=>{const w=diff(p.date,TODAY);return {num:e.num,title:e.title,clip:p.clip,plat:PL[p.plat][0],color:PL[p.plat][1],when:`${fmt(p.date)}, ${fmtT(p.time)}`,wait:daysTxt(w),waitColor:w>=3?'#A12B2B':'#1F2733',checks:`${p.checks.filter(Boolean).length} of 5`,onClick:()=>this.open(e.id,'verification')};});
+    const failed=allPosts.filter(x=>x.p.status==='failed').map(({e,p})=>({num:e.num,title:e.title,clip:p.clip,plat:PL[p.plat][0],color:PL[p.plat][1],when:`${fmt(p.date)}, ${fmtT(p.time)}`,onClick:()=>this.open(e.id,'publishing')}));
+    const nextNum=Math.max(...eps.map(x=>x.num))+1;
+
+    return {
+      nav,todayLabel:pd(TODAY).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'}),
+      search:s.search,onSearch:ev=>this.setState({search:ev.target.value,screen:s.screen==='episodes'?'episodes':(ev.target.value?'episodes':s.screen)}),
+      openModal:()=>this.setState({modal:true,nf:{title:'',record:TODAY,due:add(TODAY,28)},nfErr:''}),closeModal:()=>this.setState({modal:false}),stop:ev=>ev.stopPropagation(),
+      isDashboard:s.screen==='dashboard',isEpisodes:s.screen==='episodes',isDetail:s.screen==='detail'&&!!e,isCalendar:s.screen==='calendar',isVerification:s.screen==='verification',
+      summary,actions,actionCount:actions.length,columns,epCount:eps.length,showCardMeta:this.props.cardDetail!=='compact',
+      fStage:s.fStage,fOwner:s.fOwner,fFrom:s.fFrom,fTo:s.fTo,stageOpts:ST.map((x,i)=>({value:String(i),label:x.label})),
+      onFStage:ev=>this.setState({fStage:ev.target.value}),onFOwner:ev=>this.setState({fOwner:ev.target.value}),onFFrom:ev=>this.setState({fFrom:ev.target.value}),onFTo:ev=>this.setState({fTo:ev.target.value}),
+      clearFilters:()=>this.setState({search:'',fStage:'',fOwner:'',fFrom:'',fTo:''}),
+      headers,rows,rowCount:rows.length,noRows:!rows.length,
+      d,backToEpisodes:()=>this.go('episodes'),note:s.note,onNote:ev=>this.setState({note:ev.target.value}),blockDraft:s.blockDraft,onBlockDraft:ev=>this.setState({blockDraft:ev.target.value}),
+      calRange,isWeek,isMonth:!isWeek,week,month,dows:DOW.map(l=>({label:l})),calPrev:()=>shift(-1),calNext:()=>shift(1),calToday:()=>this.setState({calAnchor:TODAY}),
+      calViews:[['week','Week'],['month','Month']].map(([k,l])=>({label:l,bg:s.calView===k?'#1B2A4A':'#FFFFFF',fg:s.calView===k?'#FFFFFF':'#1B2A4A',onClick:()=>this.setState({calView:k})})),
+      legend:Object.values(PL).map(p=>({label:p[0],color:p[1]})),
+      vSummary:[{label:'Awaiting verification',value:awaiting.length},{label:'Failed posts',value:failed.length},{label:'Verified posts',value:allPosts.filter(x=>x.p.verified).length}],
+      awaiting,noAwaiting:!awaiting.length,failed,hasFailed:failed.length>0,
+      modal:s.modal,nf:s.nf,nfErr:s.nfErr,hasNfErr:!!s.nfErr,nextNum,
+      onNfTitle:ev=>{const v=ev.target.value;this.setState(st=>({nf:{...st.nf,title:v},nfErr:''}));},onNfRecord:ev=>{const v=ev.target.value;this.setState(st=>({nf:{...st.nf,record:v}}));},onNfDue:ev=>{const v=ev.target.value;this.setState(st=>({nf:{...st.nf,due:v}}));},
+      createEp:()=>{const n=s.nf;if(!n.title.trim())return this.setState({nfErr:'Add a title to create the episode.'});if(!n.due)return this.setState({nfErr:'Add a due date.'});
+        const ep={id:'ep'+nextNum,num:nextNum,title:n.title.trim(),stage:0,record:n.record||TODAY,due:n.due,entered:TODAY,done:[],handoffs:[],blocked:'',opus:'',pkg:PKG.map(()=>false),clips:[]};
+        this.setState(st=>({episodes:[...st.episodes,ep],modal:false}));this.toast(`EP ${nextNum} added to Recording and edit. Tyler is the owner.`);},
+      cf:s.cf,cfErr:s.cfErr,hasCfErr:!!s.cfErr,pf:{...s.pf,clipId:s.pf.clipId||(e&&e.clips[0]?e.clips[0].id:'')},
+      onCfName:ev=>{const v=ev.target.value;this.setState(st=>({cf:{...st.cf,name:v},cfErr:''}));},onCfLen:ev=>{const v=ev.target.value;this.setState(st=>({cf:{...st.cf,len:v}}));},onCfCaption:ev=>{const v=ev.target.value;this.setState(st=>({cf:{...st.cf,caption:v}}));},
+      cfPlats:Object.entries(PL).map(([k,p])=>{const on=s.cf.plats.includes(k);return {label:p[0],color:p[1],bg:on?tint(p[1]):'#FFFFFF',border:on?p[1]:'#D3D8E0',onClick:()=>this.setState(st=>({cf:{...st.cf,plats:on?st.cf.plats.filter(x=>x!==k):[...st.cf.plats,k]}}))};}),
+      platOpts:Object.entries(PL).map(([k,p])=>({value:k,label:p[0]})),
+      onPfClip:ev=>{const v=ev.target.value;this.setState(st=>({pf:{...st.pf,clipId:v}}));},onPfPlat:ev=>{const v=ev.target.value;this.setState(st=>({pf:{...st.pf,plat:v}}));},onPfDate:ev=>{const v=ev.target.value;this.setState(st=>({pf:{...st.pf,date:v}}));},onPfTime:ev=>{const v=ev.target.value;this.setState(st=>({pf:{...st.pf,time:v}}));},onPfStatus:ev=>{const v=ev.target.value;this.setState(st=>({pf:{...st.pf,status:v}}));},
+      toast:s.toast,hasToast:!!s.toast
+    };
+  }
+}
+</script>
+</body>
+</html>
