@@ -12,7 +12,7 @@ interface CalPost {
   p: FlatPost;
 }
 
-export function Calendar({ episodes }: { episodes: Episode[] }) {
+export function Calendar({ episodes, onExport }: { episodes: Episode[]; onExport: () => void }) {
   const { today } = useApp();
   const [view, setView] = useState<'week' | 'month'>('week');
   const [anchor, setAnchor] = useState(today);
@@ -55,6 +55,9 @@ export function Calendar({ episodes }: { episodes: Episode[] }) {
             Next
           </button>
         </div>
+        <button className="btn-secondary" onClick={onExport}>
+          Export
+        </button>
         <div className="segmented views">
           {(['week', 'month'] as const).map((k) => (
             <button key={k} className={view === k ? 'on' : ''} onClick={() => setView(k)}>

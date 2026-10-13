@@ -73,6 +73,15 @@ export function createLocalStore(): Store {
         advance(e, note, today);
       });
     },
+    async deleteEpisode(id) {
+      write((eps) => {
+        ep(eps, id);
+        eps.splice(
+          eps.findIndex((x) => x.id === id),
+          1,
+        );
+      });
+    },
     async updateEpisode(id, patch) {
       write((eps) => Object.assign(ep(eps, id), patch));
     },

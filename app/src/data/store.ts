@@ -29,6 +29,8 @@ export interface Store {
   subscribe(onChange: () => void): () => void;
   createEpisode(title: string, record: string, due: string, today: string): Promise<number>;
   handOff(episodeId: string, note: string, today: string): Promise<void>;
+  /** Removes the episode with its handoffs, clips and posts. */
+  deleteEpisode(episodeId: string): Promise<void>;
   updateEpisode(episodeId: string, patch: EpisodePatch): Promise<void>;
   addClip(episodeId: string, clip: { name: string; len: string; caption: string }, posts: NewPost[]): Promise<void>;
   addPost(clipId: string, post: NewPost): Promise<void>;

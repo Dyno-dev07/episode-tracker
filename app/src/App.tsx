@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Ctx, type AppCtx, type Screen, type Tab } from './app-context';
+import { ExportModal } from './components/ExportModal';
 import { NewEpisodeModal } from './components/NewEpisodeModal';
 import type { Store } from './data/store';
 import { parseDate, today as getToday } from './lib/dates';
@@ -37,6 +38,7 @@ export function App({ store, onSignOut, userEmail }: { store: Store; onSignOut?:
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<Filters>(emptyFilters);
   const [modal, setModal] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [toast, setToast] = useState<{ text: string; error?: boolean } | null>(null);
   const [today, setToday] = useState(getToday);
   const toastTimer = useRef<number>(undefined);
@@ -131,8 +133,8 @@ export function App({ store, onSignOut, userEmail }: { store: Store; onSignOut?:
   else if (!episodes) body = <div className="loading">Loading episodes</div>;
   else if (route.screen === 'dashboard') body = <Dashboard episodes={eps} />;
   else if (route.screen === 'episodes')
-    body = <Episodes episodes={eps} search={search} onSearch={onSearch} filters={filters} onFilters={setFilters} onNew={() => setModal(true)} />;
-  else if (route.screen === 'calendar') body = <Calendar episodes={eps} />;
+    body = <Episodes episodes={eps} search={search} onSearch={onSearch} filters={filters} onFilters={setFilters} onNew={() => setModal(true)} onExport={() => setExporting(true)} />;
+  else if (route.screen === 'calendar') body = <Calendar episodes={eps} onExport={() => setExporting(true)} />;
   else if (route.screen === 'verification') body = <Verification episodes={eps} />;
   else if (detailEp && route.screen === 'detail')
     body = (
@@ -200,6 +202,7 @@ export function App({ store, onSignOut, userEmail }: { store: Store; onSignOut?:
         </div>
 
         {modal && <NewEpisodeModal nextNum={nextNum} onClose={() => setModal(false)} />}
+        {exporting && <ExportModal episodes={eps} onClose={() => setExporting(false)} />}
         {toast && (
           <div className={'toast' + (toast.error ? ' error' : '')} role="status">
             {toast.text}

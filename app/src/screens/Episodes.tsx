@@ -46,8 +46,9 @@ export function Episodes(props: {
   filters: Filters;
   onFilters: (f: Filters) => void;
   onNew: () => void;
+  onExport: () => void;
 }) {
-  const { episodes, search, onSearch, filters: f, onFilters, onNew } = props;
+  const { episodes, search, onSearch, filters: f, onFilters, onNew, onExport } = props;
   const { today, open } = useApp();
   const [sort, setSort] = useState<{ key: SortKey; dir: 'asc' | 'desc' }>({ key: 'num', dir: 'desc' });
   const set = (patch: Partial<Filters>) => onFilters({ ...f, ...patch });
@@ -79,9 +80,14 @@ export function Episodes(props: {
             Showing {rows.length} of {episodes.length} episodes
           </div>
         </div>
-        <button className="btn" onClick={onNew}>
-          Add episode
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="btn-secondary" style={{ padding: '0 14px' }} onClick={onExport}>
+            Export
+          </button>
+          <button className="btn" onClick={onNew}>
+            Add episode
+          </button>
+        </div>
       </div>
 
       <div className="card filters">
