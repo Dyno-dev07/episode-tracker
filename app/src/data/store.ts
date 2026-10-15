@@ -9,6 +9,10 @@ export interface PostPatch {
 }
 
 export interface EpisodePatch {
+  num?: number;
+  title?: string;
+  record?: string;
+  due?: string;
   blocked?: string;
   drive?: string;
   pkg?: boolean[];
@@ -33,7 +37,11 @@ export interface Store {
   deleteEpisode(episodeId: string): Promise<void>;
   updateEpisode(episodeId: string, patch: EpisodePatch): Promise<void>;
   addClip(episodeId: string, clip: { name: string; len: string; caption: string }, posts: NewPost[]): Promise<void>;
+  updateClip(clipId: string, patch: { name?: string; len?: string; caption?: string }): Promise<void>;
+  /** Removes the clip and all of its posts. */
+  deleteClip(clipId: string): Promise<void>;
   addPost(clipId: string, post: NewPost): Promise<void>;
+  deletePost(postId: string): Promise<void>;
   /** Setting a status other than published clears verification. */
   updatePost(postId: string, patch: PostPatch): Promise<void>;
   /** Returns true when the episode moved to Verified. */

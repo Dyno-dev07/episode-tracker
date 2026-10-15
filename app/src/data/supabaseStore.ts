@@ -113,16 +113,36 @@ export function createSupabaseStore(sb: SupabaseClient): Store {
     },
     async updateEpisode(id, patch) {
       const row: Record<string, unknown> = {};
+      if (patch.num !== undefined) row.num = patch.num;
+      if (patch.title !== undefined) row.title = patch.title;
+      if (patch.record !== undefined) row.record_date = patch.record;
+      if (patch.due !== undefined) row.due_date = patch.due;
       if (patch.blocked !== undefined) row.blocked = patch.blocked;
       if (patch.drive !== undefined) row.drive_url = patch.drive;
       if (patch.pkg !== undefined) row.pkg = patch.pkg;
-      await check(sb.from('episodes').update(row).eq('id', id));
+      const { error } = await sb.from('episodes').update(row).eq('id', id);
+      if (error?.code === '23505') throw new Error(`EP ${patch.num} already exists.`);
+      if (error) throw new Error(error.message);
     },
     async addClip(id, clip, posts) {
       const created = await check(
         sb.from('clips').insert({ episode_id: id, name: clip.name, length: clip.len, caption: clip.caption }).select('id').single(),
       );
       if (posts.length) await check(sb.from('posts').insert(posts.map((p) => ({ clip_id: created!.id, ...postRow(p) }))));
+    },
+    async updateClip(clipId, patch) {
+      const row: Record<string, unknown> = {};
+      if (patch.name !== undefined) row.name = patch.name;
+      if (patch.len !== undefined) row.length = patch.len;
+      if (patch.caption !== undefined) row.caption = patch.caption;
+      await check(sb.from('clips').update(row).eq('id', clipId));
+    },
+    async deleteClip(clipId) {
+      // Posts are removed by the foreign key cascade.
+      await check(sb.from('clips').delete().eq('id', clipId));
+    },
+    async deletePost(postId) {
+      await check(sb.from('posts').delete().eq('id', postId));
     },
     async addPost(clipId, post) {
       await check(sb.from('posts').insert({ clip_id: clipId, ...postRow(post) }));
