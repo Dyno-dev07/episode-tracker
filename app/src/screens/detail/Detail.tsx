@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useApp, type Tab } from '../../app-context';
 import { ConfirmModal } from '../../components/ConfirmModal';
+import { EditEpisodeForm } from './EditEpisodeForm';
 import { Avatar, Badge } from '../../components/ui';
 import { EPISODE_STATUS_COLORS, STAGES } from '../../lib/constants';
 import { daysText, fmtDate } from '../../lib/dates';
@@ -16,9 +17,11 @@ export function Detail({ e, tab, onTab, onBack }: { e: Episode; tab: Tab; onTab:
   const { today, store, run } = useApp();
   const [note, setNote] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [editing, setEditing] = useState(false);
   useEffect(() => {
     setNote('');
     setConfirmDelete(false);
+    setEditing(false);
   }, [e.id]);
 
   const I = episodeInfo(e, today);
@@ -55,6 +58,9 @@ export function Detail({ e, tab, onTab, onBack }: { e: Episode; tab: Tab; onTab:
       </div>
 
       <div className="card detail-head">
+        {editing ? (
+          <EditEpisodeForm e={e} onDone={() => setEditing(false)} />
+        ) : (
         <div className="detail-top">
           <div>
             <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
@@ -80,10 +86,16 @@ export function Detail({ e, tab, onTab, onBack }: { e: Episode; tab: Tab; onTab:
               </Fact>
             </div>
           </div>
-          <button className="btn" style={{ height: 38, padding: '0 18px' }} disabled={!canHandOff} onClick={handOff}>
-            Mark complete and hand off
-          </button>
+          <div style={{ display: 'flex', gap: 8, flex: 'none' }}>
+            <button className="btn-secondary" style={{ height: 38, padding: '0 14px' }} onClick={() => setEditing(true)}>
+              Edit details
+            </button>
+            <button className="btn" style={{ height: 38, padding: '0 18px' }} disabled={!canHandOff} onClick={handOff}>
+              Mark complete and hand off
+            </button>
+          </div>
         </div>
+        )}
 
         <div className="timeline-wrap">
           <div className="timeline">

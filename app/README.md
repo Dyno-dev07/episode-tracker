@@ -39,6 +39,8 @@ If you use the Supabase CLI instead: `supabase link`, then `supabase db push`.
 - "Mark complete and hand off" logs the handoff, moves the stage, assigns the next owner and clears any blocked flag.
 - A post can be marked verified only when it is published and all five checks are ticked. The episode moves from Published to Verified automatically when its last post is verified, and cannot be handed off before then.
 - Setting a post back to scheduled or failed clears its verification.
+- "Edit details" on the episode page changes the episode number, title, record date and due date. Stage and owner change only through handoffs.
+- Clips can be edited (name, length, caption, platforms) or deleted. Adding a platform creates a draft post; removing one deletes that platform's posts for the clip.
 - Deleting an episode (button on the episode page) removes its handoffs, clips and posts for everyone, after a confirmation.
 - Export (Episodes and Calendar screens) downloads posts, episodes or handoffs as CSV for a week, a month or a date range.
 

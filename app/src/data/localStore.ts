@@ -40,6 +40,10 @@ export function createLocalStore(): Store {
     for (const e of eps) for (const c of e.clips) for (const p of c.posts) if (p.id === id) return [e, p];
     throw new Error('Post not found');
   };
+  const findClip = (eps: Episode[], id: string): [Episode, Episode['clips'][number]] => {
+    for (const e of eps) for (const c of e.clips) if (c.id === id) return [e, c];
+    throw new Error('Clip not found');
+  };
   const advance = (e: Episode, note: string, today: string) => {
     e.handoffs.push({ id: uid('h'), fs: e.stage, ts: e.stage + 1, date: today, note });
     e.stage++;
@@ -83,7 +87,24 @@ export function createLocalStore(): Store {
       });
     },
     async updateEpisode(id, patch) {
-      write((eps) => Object.assign(ep(eps, id), patch));
+      write((eps) => {
+        if (patch.num !== undefined && eps.some((x) => x.num === patch.num && x.id !== id)) throw new Error(`EP ${patch.num} already exists.`);
+        Object.assign(ep(eps, id), patch);
+      });
+    },
+    async updateClip(clipId, patch) {
+      write((eps) => Object.assign(findClip(eps, clipId)[1], patch));
+    },
+    async deleteClip(clipId) {
+      write((eps) => {
+        const [e, c] = findClip(eps, clipId);
+        e.clips = e.clips.filter((x) => x !== c);
+      });
+    },
+    async deletePost(postId) {
+      write((eps) => {
+        for (const e of eps) for (const c of e.clips) c.posts = c.posts.filter((p) => p.id !== postId);
+      });
     },
     async addClip(id, clip, posts) {
       write((eps) =>

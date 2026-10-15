@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useApp } from '../../app-context';
 import { CommitInput } from '../../components/CommitInput';
 import { Checkbox } from '../../components/ui';
+import { ClipRow } from './ClipRow';
 import { PKG, PLATFORMS, PLATFORM_KEYS, tint } from '../../lib/constants';
 import { addDays } from '../../lib/dates';
 import type { Episode, PlatformKey } from '../../lib/types';
@@ -87,30 +88,7 @@ export function PackageTab({ e }: { e: Episode }) {
           <span className="count">{e.clips.length} clips</span>
         </div>
         {e.clips.map((c) => (
-          <div key={c.id} className="clip-row">
-            <div>
-              <div style={{ display: 'flex', gap: 10, alignItems: 'baseline' }}>
-                <span style={{ fontSize: 14, fontWeight: 'bold', color: '#1F2733' }}>{c.name}</span>
-                <span className="metric-note" style={{ marginTop: 0 }}>
-                  {c.len}
-                </span>
-              </div>
-              <div style={{ marginTop: 8, fontSize: 13, lineHeight: 1.5, color: '#3A4556', textWrap: 'pretty' }}>{c.caption}</div>
-            </div>
-            <div>
-              <div className="metric-note" style={{ marginTop: 0, marginBottom: 6 }}>
-                Target platforms
-              </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                {[...new Set(c.posts.map((p) => p.plat))].map((k) => (
-                  <span key={k} className="plat-tag" style={{ background: tint(PLATFORMS[k].color) }}>
-                    <span className="sq" style={{ background: PLATFORMS[k].color }} />
-                    {PLATFORMS[k].label}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
+          <ClipRow key={c.id} e={e} c={c} />
         ))}
         {!e.clips.length && (
           <div className="empty" style={{ padding: '20px 20px 4px' }}>
