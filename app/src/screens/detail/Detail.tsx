@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useApp, type Tab } from '../../app-context';
 import { ConfirmModal } from '../../components/ConfirmModal';
+import { HoldModal } from '../../components/HoldModal';
 import { EditEpisodeForm } from './EditEpisodeForm';
 import { Avatar, Badge } from '../../components/ui';
 import { EPISODE_STATUS_COLORS, STAGES } from '../../lib/constants';
@@ -18,16 +19,18 @@ export function Detail({ e, tab, onTab, onBack }: { e: Episode; tab: Tab; onTab:
   const [note, setNote] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [holding, setHolding] = useState(false);
   useEffect(() => {
+    setHolding(false);
     setNote('');
     setConfirmDelete(false);
     setEditing(false);
   }, [e.id]);
 
   const I = episodeInfo(e, today);
-  const flag = e.stage === 6 ? '' : e.blocked ? 'Blocked' : I.overdue ? 'Overdue' : '';
+  const flag = I.status === 'Complete' || I.status === 'On track' ? '' : I.status;
   const allVerified = I.posts.length > 0 && I.posts.every((p) => p.verified);
-  const canHandOff = e.stage < 5 || (e.stage === 5 && allVerified);
+  const canHandOff = !e.holdSince && (e.stage < 5 || (e.stage === 5 && allVerified));
   const next = STAGES[e.stage + 1];
 
   const handOff = async () => {
@@ -90,11 +93,32 @@ export function Detail({ e, tab, onTab, onBack }: { e: Episode; tab: Tab; onTab:
             <button className="btn-secondary" style={{ height: 38, padding: '0 14px' }} onClick={() => setEditing(true)}>
               Edit details
             </button>
+            {e.stage < 6 && !e.holdSince && (
+              <button className="btn-secondary" style={{ height: 38, padding: '0 14px' }} onClick={() => setHolding(true)}>
+                Put on hold
+              </button>
+            )}
             <button className="btn" style={{ height: 38, padding: '0 18px' }} disabled={!canHandOff} onClick={handOff}>
               Mark complete and hand off
             </button>
           </div>
         </div>
+        )}
+
+        {e.holdSince && (
+          <div className="hold-banner">
+            <span className="dot" style={{ width: 8, height: 8, background: '#5F6876', marginTop: 5 }} />
+            <div style={{ flex: 1 }}>
+              <div className="flag-title">On hold since {fmtDate(e.holdSince)}</div>
+              <div style={{ color: '#3A4556', marginTop: 3, lineHeight: 1.45 }}>{e.holdNote || 'Paused until further notice.'}</div>
+            </div>
+            <button
+              className="btn-secondary sm"
+              onClick={() => run(() => store.updateEpisode(e.id, { holdSince: '', holdNote: '' }), `EP ${e.num} resumed in ${STAGES[e.stage].label}.`)}
+            >
+              Resume episode
+            </button>
+          </div>
         )}
 
         <div className="timeline-wrap">
@@ -136,6 +160,7 @@ export function Detail({ e, tab, onTab, onBack }: { e: Episode; tab: Tab; onTab:
       {tab === 'publishing' && <PublishingTab e={e} />}
       {tab === 'verification' && <VerificationTab e={e} />}
 
+      {holding && <HoldModal e={e} onClose={() => setHolding(false)} />}
       {confirmDelete && (
         <ConfirmModal
           title={`Delete EP ${e.num}?`}

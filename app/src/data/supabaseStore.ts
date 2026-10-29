@@ -31,6 +31,8 @@ interface EpisodeRow {
   due_date: string;
   entered_date: string;
   blocked: string;
+  hold_since: string | null;
+  hold_note: string;
   drive_url: string;
   pkg: boolean[];
   handoffs: { id: string; from_stage: number; to_stage: number; date: string; note: string; created_at: string }[];
@@ -49,6 +51,9 @@ function toEpisode(r: EpisodeRow): Episode {
     due: r.due_date,
     entered: r.entered_date,
     blocked: r.blocked,
+    // Tolerates a database where 0002_on_hold.sql has not run yet.
+    holdSince: r.hold_since || '',
+    holdNote: r.hold_note || '',
     drive: r.drive_url,
     pkg: r.pkg,
     handoffs: r.handoffs.sort(byCreated).map((h) => ({ id: h.id, fs: h.from_stage, ts: h.to_stage, date: h.date, note: h.note })),
@@ -118,6 +123,8 @@ export function createSupabaseStore(sb: SupabaseClient): Store {
       if (patch.record !== undefined) row.record_date = patch.record;
       if (patch.due !== undefined) row.due_date = patch.due;
       if (patch.blocked !== undefined) row.blocked = patch.blocked;
+      if (patch.holdSince !== undefined) row.hold_since = patch.holdSince || null;
+      if (patch.holdNote !== undefined) row.hold_note = patch.holdNote;
       if (patch.drive !== undefined) row.drive_url = patch.drive;
       if (patch.pkg !== undefined) row.pkg = patch.pkg;
       const { error } = await sb.from('episodes').update(row).eq('id', id);

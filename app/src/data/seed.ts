@@ -40,6 +40,8 @@ export function seedEpisodes(): Episode[] {
       due: D(due),
       entered: o.entered ? D(o.entered) : done[stage - 1] || D(record),
       blocked: o.blocked || '',
+      holdSince: '',
+      holdNote: '',
       drive: stage >= 1 ? 'https://drive.google.com/drive/folders/wsc-ep' + num : '',
       pkg: o.pkg || PKG.map(() => stage >= 4),
       handoffs: done.map((date, i) => ({ id: `h${num}-${i}`, fs: i, ts: i + 1, date, note: notes[i] || '' })),

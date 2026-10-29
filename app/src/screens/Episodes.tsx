@@ -17,7 +17,7 @@ export const emptyFilters: Filters = { stage: '', owner: '', from: '', to: '' };
 type SortKey = 'num' | 'title' | 'stage' | 'owner' | 'record' | 'due' | 'publish' | 'status';
 type Row = { e: Episode; I: EpisodeInfo };
 
-const STATUS_ORDER = { Blocked: 0, Overdue: 1, 'On track': 2, Complete: 3 };
+const STATUS_ORDER = { Blocked: 0, Overdue: 1, 'On track': 2, 'On hold': 3, Complete: 4 };
 const SORT: Record<SortKey, (x: Row) => string | number> = {
   num: (x) => x.e.num,
   title: (x) => x.e.title,
