@@ -13,9 +13,17 @@ export function Dashboard({ episodes }: { episodes: Episode[] }) {
   const we = addDays(ws, 6);
   const schedWeek = all.filter((x) => x.p.status === 'scheduled' && x.p.date >= ws && x.p.date <= we).length;
 
+  // Episodes on hold are paused, so they count as neither in progress nor waiting.
+  const active = episodes.filter((e) => !e.holdSince);
+  const onHold = episodes.filter((e) => e.holdSince && e.stage < 6).length;
   const summary = [
-    { label: 'Episodes in progress', value: episodes.filter((e) => e.stage < 6).length, note: 'Not yet verified', onClick: () => go('episodes') },
-    { label: 'Waiting on someone else', value: episodes.filter((e) => e.stage < 3).length, note: 'With Tyler, Nik, or Wes', onClick: () => go('episodes') },
+    {
+      label: 'Episodes in progress',
+      value: active.filter((e) => e.stage < 6).length,
+      note: onHold ? `Not yet verified. ${onHold} on hold` : 'Not yet verified',
+      onClick: () => go('episodes'),
+    },
+    { label: 'Waiting on someone else', value: active.filter((e) => e.stage < 3).length, note: 'With Tyler, Nik, or Wes', onClick: () => go('episodes') },
     { label: 'Scheduled this week', value: schedWeek, note: `${fmtDate(ws)} to ${fmtDate(we)}`, onClick: () => go('calendar') },
     {
       label: 'Published awaiting verification',
@@ -26,7 +34,7 @@ export function Dashboard({ episodes }: { episodes: Episode[] }) {
   ];
 
   const actions = episodes
-    .filter((e) => isOperatorStage(e.stage))
+    .filter((e) => isOperatorStage(e.stage) && !e.holdSince)
     .sort((a, b) => b.stage - a.stage)
     .map((e) => {
       const I = episodeInfo(e, today);
@@ -126,9 +134,9 @@ export function Dashboard({ episodes }: { episodes: Episode[] }) {
 function PipelineCard({ e }: { e: Episode }) {
   const { today, open } = useApp();
   const I = episodeInfo(e, today);
-  const flag = e.blocked ? 'Blocked' : I.overdue ? 'Overdue' : '';
+  const flag = I.status === 'On hold' || I.status === 'Blocked' || I.status === 'Overdue' ? I.status : '';
   return (
-    <div className="ep-card" onClick={() => open(e.id)}>
+    <div className={'ep-card' + (e.holdSince ? ' held' : '')} onClick={() => open(e.id)}>
       <div className="ep-card-top">
         <span>EP {e.num}</span>
         {flag && (

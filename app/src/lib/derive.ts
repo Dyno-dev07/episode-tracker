@@ -16,8 +16,10 @@ export interface EpisodeInfo {
 
 export function episodeInfo(e: Episode, today: string): EpisodeInfo {
   const posts = flatPosts(e);
-  const overdue = e.stage < 5 && e.due < today;
-  const status: EpisodeStatus = e.stage === 6 ? 'Complete' : e.blocked ? 'Blocked' : overdue ? 'Overdue' : 'On track';
+  // An episode on hold is paused until further notice, so it is never overdue.
+  const overdue = !e.holdSince && e.stage < 5 && e.due < today;
+  const status: EpisodeStatus =
+    e.stage === 6 ? 'Complete' : e.holdSince ? 'On hold' : e.blocked ? 'Blocked' : overdue ? 'Overdue' : 'On track';
   const dated = posts.filter((p) => p.status !== 'draft').map((p) => p.date).sort();
   return { posts, overdue, status, owner: STAGES[e.stage].owner, publish: dated[0] || '', days: diffDays(e.entered, today) };
 }

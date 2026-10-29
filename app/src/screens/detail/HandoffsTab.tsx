@@ -14,8 +14,9 @@ export function HandoffsTab(props: { e: Episode; note: string; onNote: (v: strin
   const unverified = I.posts.filter((p) => !p.verified).length;
   const allVerified = I.posts.length > 0 && unverified === 0;
 
-  const gate =
-    e.stage === 6
+  const gate = e.holdSince
+    ? 'This episode is on hold. Resume it at the top of the page to hand off.'
+    : e.stage === 6
       ? 'This episode is verified. No further handoffs.'
       : e.stage === 5 && !allVerified
         ? `${unverified} of ${I.posts.length} posts still need verification. The episode moves to Verified when every post is verified.`
@@ -24,7 +25,9 @@ export function HandoffsTab(props: { e: Episode; note: string; onNote: (v: strin
           : '';
 
   const overdueText =
-    e.stage >= 5
+    e.holdSince
+      ? `On hold, so not flagged. Due ${fmtDate(e.due)}.`
+      : e.stage >= 5
       ? 'Published. The due date no longer applies.'
       : I.overdue
         ? `Overdue by ${daysText(diffDays(e.due, today))}. Due ${fmtDate(e.due)}.`

@@ -224,3 +224,6 @@ button.metric:hover { border-color: #1b2a4a; }
 .loading { padding: 28px; font-size: 13px; color: #5f6876; }
 .btn.btn-destructive { background: #a12b2b; }
 .btn.btn-destructive:disabled { background: #d4a5a5; }
+.hold-banner { margin-top: 20px; display: flex; gap: 10px; align-items: flex-start; font-size: 13px; background: #f4f5f7; border: 1px solid #e2e5ea; border-left: 3px solid #5f6876; border-radius: 6px; padding: 12px 14px; }
+.ep-card.held { background: #f7f8fa; }
+.ep-card.held .ep-card-title { color: #5f6876; }

@@ -16,7 +16,7 @@ Without Supabase settings the app runs in **demo mode**: it loads the sample epi
 ## Connect Supabase
 
 1. Create a project at supabase.com.
-2. In the SQL editor, run `supabase/migrations/0001_init.sql`. This creates the tables, access policies, the `hand_off`, `verify_post` and `create_episode` functions, and turns on realtime.
+2. In the SQL editor, run each file in `supabase/migrations/` in order (`0001_init.sql`, then `0002_on_hold.sql`). This creates the tables, access policies, the `hand_off`, `verify_post` and `create_episode` functions, and turns on realtime.
 3. Optional: run `supabase/seed.sql` to load the 8 sample episodes (EP 108 to 115).
 4. Copy `.env.example` to `.env.local` and fill in the project URL and anon key from Project settings > API.
 5. Under Authentication > URL configuration, set the Site URL to where the app runs (for example `http://localhost:5173`) and add it to the redirect URLs.
@@ -41,6 +41,7 @@ If you use the Supabase CLI instead: `supabase link`, then `supabase db push`.
 - Setting a post back to scheduled or failed clears its verification.
 - "Edit details" on the episode page changes the episode number, title, record date and due date. Stage and owner change only through handoffs.
 - Clips can be edited (name, length, caption, platforms) or deleted. Adding a platform creates a draft post; removing one deletes that platform's posts for the clip.
+- "Put on hold" pauses an episode until further notice, with an optional reason. While on hold it cannot be handed off, is never flagged overdue, and is left out of Needs my action and the in-progress counts. "Resume episode" puts it back in its stage.
 - Deleting an episode (button on the episode page) removes its handoffs, clips and posts for everyone, after a confirmation.
 - Export (Episodes and Calendar screens) downloads posts, episodes or handoffs as CSV for a week, a month or a date range.
 

@@ -15,7 +15,7 @@ export function createLocalStore(): Store {
   function read(): Episode[] {
     try {
       const raw = localStorage.getItem(KEY);
-      if (raw) return JSON.parse(raw);
+      if (raw) return (JSON.parse(raw) as Episode[]).map((e) => ({ ...e, holdSince: e.holdSince || '', holdNote: e.holdNote || '' }));
     } catch {
       /* fall through to seed */
     }
@@ -64,7 +64,7 @@ export function createLocalStore(): Store {
     async createEpisode(title, record, due, today) {
       const num = Math.max(0, ...data.map((x) => x.num)) + 1;
       write((eps) =>
-        eps.push({ id: uid('ep'), num, title, stage: 0, record, due, entered: today, blocked: '', drive: '', pkg: PKG.map(() => false), handoffs: [], clips: [] }),
+        eps.push({ id: uid('ep'), num, title, stage: 0, record, due, entered: today, blocked: '', holdSince: '', holdNote: '', drive: '', pkg: PKG.map(() => false), handoffs: [], clips: [] }),
       );
       return num;
     },
@@ -72,6 +72,7 @@ export function createLocalStore(): Store {
       write((eps) => {
         const e = ep(eps, id);
         const posts = e.clips.flatMap((c) => c.posts);
+        if (e.holdSince) throw new Error('Episode is on hold. Resume it before handing off');
         if (e.stage >= 6) throw new Error('Episode is already verified');
         if (e.stage === 5 && (!posts.length || posts.some((p) => !p.verified))) throw new Error('Every post must be verified first');
         advance(e, note, today);
@@ -135,7 +136,7 @@ export function createLocalStore(): Store {
         if (p.status !== 'published' || p.verified || p.checks.some((c) => !c)) throw new Error('Post cannot be verified yet');
         p.verified = true;
         p.vDate = today;
-        if (e.stage === 5 && e.clips.every((c) => c.posts.every((x) => x.verified))) {
+        if (!e.holdSince && e.stage === 5 && e.clips.every((c) => c.posts.every((x) => x.verified))) {
           advance(e, 'All posts verified.', today);
           moved = true;
         }

@@ -45,9 +45,10 @@ export const STATUS_COLORS: Record<PostStatus, [string, string]> = {
   failed: ['#FBE9E9', '#A12B2B'],
 };
 
-export type EpisodeStatus = 'Complete' | 'Blocked' | 'Overdue' | 'On track';
+export type EpisodeStatus = 'Complete' | 'On hold' | 'Blocked' | 'Overdue' | 'On track';
 export const EPISODE_STATUS_COLORS: Record<EpisodeStatus, [string, string]> = {
   Complete: ['#E7F2EB', '#2B6B43'],
+  'On hold': ['#5F6876', '#FFFFFF'],
   Blocked: ['#FBE9E9', '#A12B2B'],
   Overdue: ['#FDF1DE', '#8A5300'],
   'On track': ['#EEF1F5', '#3A4556'],

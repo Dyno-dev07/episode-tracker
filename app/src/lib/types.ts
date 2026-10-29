@@ -38,6 +38,9 @@ export interface Episode {
   due: string;
   entered: string;
   blocked: string;
+  /** Date the episode was put on hold, or '' when active. */
+  holdSince: string;
+  holdNote: string;
   drive: string;
   pkg: boolean[];
   handoffs: Handoff[];

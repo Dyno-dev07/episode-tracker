@@ -14,6 +14,8 @@ export interface EpisodePatch {
   record?: string;
   due?: string;
   blocked?: string;
+  holdSince?: string;
+  holdNote?: string;
   drive?: string;
   pkg?: boolean[];
 }
